@@ -1,36 +1,44 @@
 package main
 
 import (
-	"flag"
+	"net/http"
 
 	"github.com/golovers/fktools/fk"
+	"github.com/gorilla/mux"
 )
 
 func main() {
-	plugin := flag.String("p", "jira", "one of the supported plugin: jira, phbricator, versionone")
-	export := flag.String("e", "", "csv file name to be exported base on the base query")
-	flag.Parse()
-
-	var plug fk.Plugin
-	switch *plugin {
-	case "jira":
-		plug = jira()
-	default:
-		panic("error: not supported plugin type")
-	}
+	conf, plug := plugin()
 	fk.SetPlugin(plug)
 
-	if *export != "" {
-		issues, err := fk.AllIssues()
-		if err != nil {
-			panic(err)
-		}
-		issues.ToCSV(*export)
+	db, err := fk.NewLDBDatabase(conf.DBName, 1000, 16)
+	defer db.Close()
+	if err != nil {
+		panic(err)
+	}
+	fk.SetDatabase(db)
+
+	sched := fk.NewCronScheduler()
+	sched.Start()
+	fk.SetScheduler(sched)
+	defer sched.Stop()
+
+	fk.SchedSync(conf.SyncSched)
+	go fk.Sync()
+
+	r := mux.NewRouter()
+	if err := http.ListenAndServe(conf.HTTPAddress, r); err != nil {
+		panic(err)
 	}
 }
 
-func jira() fk.Plugin {
-	var conf fk.JiraConf
+func plugin() (*fk.Conf, fk.Plugin) {
+	var conf fk.Conf
 	fk.LoadEnvConf(&conf)
-	return fk.NewJira(&conf)
+	switch conf.Plug {
+	case "jira":
+		return &conf, fk.NewJira(&conf)
+	default:
+		return &conf, fk.NewJira(&conf)
+	}
 }

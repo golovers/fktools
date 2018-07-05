@@ -6,10 +6,10 @@ import (
 	"time"
 )
 
-var attrs = []string{"IssueType", "Key", "Status", "Summary", "Priority", "StoryPoints", "EpicLink", "Sprint",
-	"FixVersions", "Reporter", "AffectsVersions", "Assignee", "Components", "Created", "Labels",
-	"Resolution", "Resolved", "TotalOriginalEstimate", "TotalRemainingEstimate",
-	"TotalTimeSpent"}
+var attrs = []string{"Issue Type", "Key", "Status", "Summary", "Priority", "Story Points", "Epic", "Sprint",
+	"Fix Version/s", "Reporter", "Affected Version/s", "Assignee", "Components", "Created", "Labels",
+	"Resolution", "Resolved", "Time Original Estimate", "Time Estimate",
+	"Time Spent"}
 
 func StringToStrings(s string) []string {
 	return strings.Split(s, ",")
@@ -31,26 +31,26 @@ type Plugin interface {
 
 // Issue represent an issue
 type Issue struct {
-	IssueType              string
-	Key                    string
-	Status                 string
-	Summary                string
-	Priority               string
-	StoryPoints            float64
-	EpicLink               string
-	Sprint                 string
-	FixVersions            []string
-	Reporter               string
-	AffectsVersions        []string
-	Assignee               string
-	Components             []string
-	Created                *time.Time
-	Labels                 []string
-	Resolution             string
-	Resolved               *time.Time
-	TotalOriginalEstimate  int
-	TotalRemainingEstimate int
-	TotalTimeSpent         int
+	IssueType            string
+	Key                  string
+	Status               string
+	Summary              string
+	Priority             string
+	StoryPoints          float64
+	EpicLink             string
+	Sprint               string
+	FixVersions          []string
+	Reporter             string
+	AffectsVersions      []string
+	Assignee             string
+	Components           []string
+	Created              *time.Time
+	Labels               []string
+	Resolution           string
+	Resolved             *time.Time
+	TimeOriginalEstimate int
+	TimeEstimate         int
+	TimeSpent            int
 }
 
 // ToCSV return csv string of the issue
@@ -64,11 +64,11 @@ func (issue *Issue) ToCSV() string {
 	}
 	fmtStr += "\n"
 	str := fmt.Sprintf(fmtStr,
-		issue.IssueType, issue.Key, issue.Status, issue.Summary, issue.Priority, issue.StoryPoints,
+		issue.IssueType, issue.Key, issue.Status, EscapeSpecialChars(issue.Summary), issue.Priority, issue.StoryPoints,
 		issue.EpicLink, issue.Sprint, StringsToString(issue.FixVersions), issue.Reporter, StringsToString(issue.AffectsVersions),
 		issue.Assignee, StringsToString(issue.Components), issue.Created,
-		StringsToString(issue.Labels), issue.Resolution, issue.Resolved,
-		issue.TotalOriginalEstimate, issue.TotalRemainingEstimate, issue.TotalTimeSpent)
+		EscapeSpecialChars(StringsToString(issue.Labels)), issue.Resolution, issue.Resolved,
+		issue.TimeOriginalEstimate, issue.TimeEstimate, issue.TimeSpent)
 	return str
 }
 

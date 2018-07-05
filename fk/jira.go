@@ -2,7 +2,6 @@ package fk
 
 import (
 	"crypto/tls"
-	"fmt"
 	"net/http"
 	"reflect"
 	"strings"
@@ -10,24 +9,40 @@ import (
 	jira "github.com/andygrunwald/go-jira"
 )
 
-// JiraConf configurations for JIRA
-type JiraConf struct {
-	Host           string `envconfig:"JIRA_HOST"`
-	Username       string `envconfig:"JIRA_USERNAME"`
-	Password       string `envconfig:"JIRA_PASSWORD"`
-	StoryPointAttr string `envconfig:"JIRA_ATTR_STORYPOINT"`
-	SprintAttr     string `envconfig:"JIRA_ATTR_SPRINT"`
-	EpicNameAttr   string `envconfig:"JIRA_ATTR_EPICLINK"`
-	BaseQuery      string `envconfig:"JIRA_BASE_QUERY"`
+var jiraFields = map[string]string{
+	"key":                  "key",
+	"summary":              "summary",
+	"issuetype":            "issuetype",
+	"affectedversions":     "versions",
+	"status":               "status",
+	"assignee":             "assignee",
+	"reporter":             "reporter",
+	"priority":             "priority",
+	"components":           "components",
+	"fixversions":          "fixVersions",
+	"created":              "created",
+	"labels":               "labels",
+	"resolution":           "resolution",
+	"resolutiondate":       "resolutiondate",
+	"project":              "project",
+	"timespent":            "timespent",
+	"timeoriginalestimate": "timeoriginalestimate",
+	"timeestimate":         "timeestimate",
+	"sprint":               "sprint",
+	"epic":                 "epic",
+	"storypoint":           "storypoint",
 }
 
 // Jira plugin for JIRA
 type Jira struct {
-	conf *JiraConf
+	conf *Conf
 }
 
 // NewJira return a new jira config
-func NewJira(conf *JiraConf) *Jira {
+func NewJira(conf *Conf) *Jira {
+	for k, v := range conf.FieldsMapping {
+		jiraFields[k] = v
+	}
 	return &Jira{
 		conf: conf,
 	}
@@ -38,13 +53,18 @@ func (jr *Jira) AllIssues() (Issues, error) {
 	issues := make([]*Issue, 0)
 	start := 0
 	max := 200
+
+	fields := make([]string, 0)
+	for _, v := range jiraFields {
+		fields = append(fields, v)
+	}
 	for {
-		jrIssues, res, err := jr.client().Issue.Search(jr.conf.BaseQuery, &jira.SearchOptions{
+		jrIssues, _, err := jr.client().Issue.Search(jr.conf.BaseQuery, &jira.SearchOptions{
 			StartAt:    start,
 			MaxResults: max,
+			Fields:     fields,
 		})
 		if err != nil {
-			fmt.Println(res)
 			return issues, err
 		}
 		for _, issue := range jrIssues {
@@ -52,42 +72,43 @@ func (jr *Jira) AllIssues() (Issues, error) {
 		}
 		if len(jrIssues) < max {
 			return issues, nil
+
 		}
 		start += max
 	}
 }
 
 func (jr *Jira) toIssue(issue jira.Issue) *Issue {
-	epic, _ := issue.Fields.Unknowns.String(jr.conf.EpicNameAttr)
+	epic, _ := issue.Fields.Unknowns.String(jiraFields["epic"])
 	sprint := jr.sprint(issue)
-	storyPoint := jr.floatVal(issue, jr.conf.StoryPointAttr)
+	storyPoint := jr.floatVal(issue, jiraFields["storypoint"])
 
-	val, _ := issue.Fields.Unknowns.Value("versions")
+	val, _ := issue.Fields.Unknowns.Value(jiraFields["affectedversions"])
 	versions := make([]string, 0)
 	for _, vv := range val.([]interface{}) {
 		versions = append(versions, vv.(map[string]interface{})["name"].(string))
 	}
 	return &Issue{
-		IssueType:              issue.Fields.Type.Name,
-		Key:                    issue.Key,
-		Status:                 issue.Fields.Status.Name,
-		Summary:                issue.Fields.Summary,
-		Priority:               issue.Fields.Priority.Name,
-		StoryPoints:            storyPoint,
-		EpicLink:               epic,
-		Sprint:                 sprint,
-		FixVersions:            toFixVersions(issue.Fields.FixVersions),
-		Reporter:               issue.Fields.Reporter.Name,
-		AffectsVersions:        versions,
-		Assignee:               toAssignee(issue.Fields.Assignee),
-		Components:             toComponents(issue.Fields.Components),
-		Created:                StringToTime(issue.Fields.Created),
-		Labels:                 issue.Fields.Labels,
-		Resolution:             toResolution(issue.Fields.Resolution),
-		Resolved:               StringToTime(issue.Fields.Resolutiondate),
-		TotalOriginalEstimate:  timeOriginal(issue.Fields.TimeTracking),
-		TotalRemainingEstimate: timeRemaining(issue.Fields.TimeTracking),
-		TotalTimeSpent:         timeSpent(issue.Fields.TimeTracking),
+		IssueType:            issue.Fields.Type.Name,
+		Key:                  issue.Key,
+		Status:               issue.Fields.Status.Name,
+		Summary:              issue.Fields.Summary,
+		Priority:             issue.Fields.Priority.Name,
+		StoryPoints:          storyPoint,
+		EpicLink:             epic,
+		Sprint:               sprint,
+		FixVersions:          toFixVersions(issue.Fields.FixVersions),
+		Reporter:             issue.Fields.Reporter.Name,
+		AffectsVersions:      versions,
+		Assignee:             toAssignee(issue.Fields.Assignee),
+		Components:           toComponents(issue.Fields.Components),
+		Created:              StringToTime(issue.Fields.Created),
+		Labels:               issue.Fields.Labels,
+		Resolution:           toResolution(issue.Fields.Resolution),
+		Resolved:             StringToTime(issue.Fields.Resolutiondate),
+		TimeOriginalEstimate: issue.Fields.TimeOriginalEstimate,
+		TimeEstimate:         issue.Fields.TimeEstimate,
+		TimeSpent:            issue.Fields.TimeSpent,
 	}
 }
 
@@ -173,7 +194,7 @@ func timeRemaining(t *jira.TimeTracking) int {
 }
 
 func (jr *Jira) sprint(issue jira.Issue) string {
-	vsprint, _ := issue.Fields.Unknowns.Value(jr.conf.SprintAttr)
+	vsprint, _ := issue.Fields.Unknowns.Value(jiraFields["sprint"])
 	if vsprint != nil {
 		val, _ := reflect.ValueOf(vsprint).Index(0).Interface().(string)
 		vals := strings.Split(val, ",")

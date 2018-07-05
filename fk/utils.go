@@ -1,13 +1,14 @@
 package fk
 
 import (
+	"encoding/json"
 	"io/ioutil"
 	"time"
 
 	"strings"
 
 	"github.com/go-yaml/yaml"
-	"github.com/kelseyhightower/envconfig"
+	"github.com/rs/xid"
 )
 
 // ReadConf read config from  file and return config struct
@@ -44,9 +45,16 @@ func contains(values []string, v string) bool {
 	return false
 }
 
-// LoadEnvConf load configurations from config file
-func LoadEnvConf(t interface{}) {
-	if err := envconfig.Process("", t); err != nil {
-		panic(err)
+// IssuesToJSONString convert list of issues to a json string
+func IssuesToJSONString(issues Issues) (string, error) {
+	data, err := json.Marshal(issues)
+	if err != nil {
+		return "", err
 	}
+	return string(data), nil
+}
+
+// GenID return a new uqique ID
+func GenID() string {
+	return xid.New().String()
 }
