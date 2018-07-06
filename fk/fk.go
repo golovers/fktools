@@ -116,20 +116,81 @@ func SchedSync(spec string) {
 }
 
 // LoadRules load all existing rules in db
-func LoadRules() ([]Ruler, error) {
+func LoadRules() ([]*FKRule, error) {
 	data, err := db.Get(keyRules)
 	if err != nil {
-		return []Ruler{}, err
+		return []*FKRule{}, err
 	}
-	var rules []Ruler
+	var rules []*FKRule
 	err = json.Unmarshal(data, &rules)
 	if err != nil {
-		return []Ruler{}, err
+		return []*FKRule{}, err
 	}
 	return rules, nil
 }
 
 // SchedRules schedule running rules
-func SchedRules(spec string) {
+func SchedRules() {
+	rules, err := LoadRules()
+	if err != nil {
+		logrus.Errorf("failed to load rules: %v", err)
+	}
+	for _, r := range rules {
+		logrus.Infof("scheduled for rule \"%s-%s\"", r.Name, r.ID)
+		sched.Sched(r.Schedule, func() {
+			evn, err := r.Run(AllIssues)
+			logrus.Infof("raised event %s, violated: %v, # issues: %d", evn.ID, evn.Violated, len(evn.Issues))
+			if err != nil {
+				logrus.Errorf("failed to run the rule %s-%s, error: %v", r.Name, r.ID, err)
+			}
+			events, err := saveEvent(r, evn)
+			if err != nil {
+				logrus.Error(err)
+			}
+			if isReachAlarmThreshold(r, events) {
+				fireAlarm(r, events)
+			}
+		})
+	}
+}
 
+func isReachAlarmThreshold(r *FKRule, events []*Event) bool {
+	count := 0
+	for _, e := range events {
+		if e.Violated {
+			count++
+		}
+	}
+	return count >= r.AlarmThreshold
+}
+
+func fireAlarm(r *FKRule, events []*Event) {
+	//TODO implement me
+	logrus.Infof("firing alarm for rule %s-%s: %d continuos time violated", r.Name, r.ID, r.AlarmThreshold)
+}
+
+// saveEvent save the given event and return the last n event from db
+func saveEvent(r *FKRule, evn *Event) ([]*Event, error) {
+	eventData, err := db.Get([]byte(r.ID))
+	if err != nil || len(eventData) == 0 {
+		// not yet has any data, just update this into the db
+		events := make([]*Event, 0)
+		events = append(events, evn)
+		jsonStr, _ := json.Marshal(events)
+		db.Put([]byte(r.ID), jsonStr)
+	}
+	var events []*Event
+	err = json.Unmarshal(eventData, &events)
+	if err != nil {
+		return []*Event{}, fmt.Errorf("failed to unmarshall events data of rule %s-%s, error: %v", r.Name, r.ID, err)
+	}
+	events = append(events, evn)
+	jsonStr, _ := json.Marshal(events)
+	db.Put([]byte(r.ID), jsonStr)
+
+	thresholdIdx := r.AlarmThreshold
+	if r.AlarmThreshold-thresholdIdx < 0 {
+		thresholdIdx = 0
+	}
+	return events[thresholdIdx:], nil
 }

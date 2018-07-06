@@ -26,6 +26,8 @@ func main() {
 	fk.SchedSync(conf.SyncSched)
 	go fk.Sync()
 
+	fk.SchedRules()
+
 	r := mux.NewRouter()
 	if err := http.ListenAndServe(conf.HTTPAddress, r); err != nil {
 		panic(err)

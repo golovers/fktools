@@ -8,21 +8,14 @@ import (
 )
 
 type Rules []Ruler
+type IssuesFunc func() (Issues, error)
 
 type Ruler interface {
-	Run()
-	SchedSpec() string
+	Run(IssuesFunc) (*Event, error)
+	Sched() string
 	Name() string
 	ID() string
-}
-
-type Rule struct {
-	ID             string
-	Name           string
-	Query          string
-	Schedule       string // when to run this rule
-	EventThreshold int    // when to fire event, this can be different between alarm types
-	AlarmThreshold int    // how many continous event to trigger alarm
+	AlarmThreshold() int
 }
 
 // Event represent an even fired by rule engine
@@ -33,17 +26,27 @@ type Event struct {
 	Issues    Issues
 }
 
+type FKRule struct {
+	ID             string
+	Name           string
+	Query          string
+	Schedule       string // when to run this rule
+	EventThreshold int    // when to fire event, this can be different between alarm types
+	AlarmThreshold int    // how many continous event to trigger alarm
+}
+
 // Run the issues list and return violated list
-func (ca *Rule) Run(issues Issues) (*Event, error) {
-	jsonBytes, err := json.Marshal(issues)
+func (cex *FKRule) Run(f IssuesFunc) (*Event, error) {
+	issues, err := f()
 	if err != nil {
 		return &Event{}, err
 	}
+	jsonBytes, err := json.Marshal(issues)
 	query, err := jsonql.NewStringQuery(string(jsonBytes))
 	if err != nil {
 		return &Event{}, err
 	}
-	val, err := query.Query(ca.Query)
+	val, err := query.Query(cex.Query)
 	if err != nil {
 		return &Event{}, err
 	}
@@ -53,7 +56,7 @@ func (ca *Rule) Run(issues Issues) (*Event, error) {
 	evn := &Event{
 		ID:        GenID(),
 		Timestamp: time.Now(),
-		Violated:  len(rissues) >= ca.EventThreshold, //TODO fix me
+		Violated:  len(rissues) >= cex.EventThreshold,
 		Issues:    rissues,
 	}
 	return evn, nil
