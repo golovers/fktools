@@ -1,13 +1,6 @@
-package fk
+package sched
 
 import "github.com/robfig/cron"
-
-// Scheduler wraps all functions that a scheduler must has
-type Scheduler interface {
-	Start()
-	Sched(spec string, f func()) error
-	Stop()
-}
 
 type cronScheduler struct {
 	sched *cron.Cron
@@ -28,6 +21,6 @@ func (cs *cronScheduler) Stop() {
 	cs.sched.Stop()
 }
 
-func (cs *cronScheduler) Sched(spec string, f func()) error {
+func (cs *cronScheduler) Schedule(spec string, f func()) error {
 	return cs.sched.AddFunc(spec, f)
 }

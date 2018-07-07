@@ -1,4 +1,4 @@
-package fk
+package conf
 
 import "github.com/kelseyhightower/envconfig"
 

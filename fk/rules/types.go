@@ -1,32 +1,23 @@
-package fk
+package rules
 
 import (
 	"encoding/json"
-	"time"
-
 	"github.com/elgs/jsonql"
+	"github.com/golovers/fktools/fk/iss"
+	"github.com/golovers/fktools/fk/types"
+	"github.com/golovers/fktools/fk/utils"
+	"time"
 )
-
-type Rules []Ruler
-type IssuesFunc func() (Issues, error)
-
-type Ruler interface {
-	Run(IssuesFunc) (*Event, error)
-	Sched() string
-	Name() string
-	ID() string
-	AlarmThreshold() int
-}
 
 // Event represent an even fired by rule engine
 type Event struct {
 	ID        string
 	Timestamp time.Time
 	Violated  bool
-	Issues    Issues
+	Issues    types.Issues
 }
 
-type FKRule struct {
+type Rule struct {
 	ID             string
 	Name           string
 	Query          string
@@ -35,9 +26,9 @@ type FKRule struct {
 	AlarmThreshold int    // how many continous event to trigger alarm
 }
 
-// Run the issues list and return violated list
-func (cex *FKRule) Run(f IssuesFunc) (*Event, error) {
-	issues, err := f()
+// Run the iss list and return violated list
+func (cex *Rule) Run() (*Event, error) {
+	issues, err := iss.Load()
 	if err != nil {
 		return &Event{}, err
 	}
@@ -50,11 +41,11 @@ func (cex *FKRule) Run(f IssuesFunc) (*Event, error) {
 	if err != nil {
 		return &Event{}, err
 	}
-	var rissues Issues
+	var rissues types.Issues
 	d, _ := json.Marshal(val)
 	json.Unmarshal(d, &rissues)
 	evn := &Event{
-		ID:        GenID(),
+		ID:        utils.GenID(),
 		Timestamp: time.Now(),
 		Violated:  len(rissues) >= cex.EventThreshold,
 		Issues:    rissues,

@@ -3,44 +3,53 @@ package main
 import (
 	"net/http"
 
-	"github.com/golovers/fktools/fk"
-	"github.com/gorilla/mux"
+	"github.com/golovers/fktools/fk/api"
+	"github.com/golovers/fktools/fk/conf"
+	"github.com/golovers/fktools/fk/db"
+	"github.com/golovers/fktools/fk/iss"
+	"github.com/golovers/fktools/fk/plug"
+	"github.com/golovers/fktools/fk/rules"
+	"github.com/golovers/fktools/fk/sched"
+	"github.com/golovers/fktools/fk/trans"
 )
 
 func main() {
-	conf, plug := plugin()
-	fk.SetPlugin(plug)
+	conf, p := plugin()
+	plug.SetPlugin(p)
 
-	db, err := fk.NewLDBDatabase(conf.DBName, 1000, 16)
+	ldb, err := db.NewLDBDatabase(conf.DBName, 1000, 16)
 	defer db.Close()
 	if err != nil {
 		panic(err)
 	}
-	fk.SetDatabase(db)
+	db.SetDatabase(ldb)
 
-	sched := fk.NewCronScheduler()
+	trans.SetTransformer(trans.NewSimTrans())
+	iss.SetIssueSvc(iss.NewSimIssueSvc())
+	rules.SetRuleSvc(rules.NewSimRuleSvc())
+
+	sched.SetScheduler(sched.NewCronScheduler())
 	sched.Start()
-	fk.SetScheduler(sched)
 	defer sched.Stop()
 
-	fk.SchedSync(conf.SyncSched)
-	go fk.Sync()
+	api.SchedSync(conf.SyncSched)
+	go iss.Sync()
 
-	fk.SchedRules()
+	api.SchedRules()
 
-	r := mux.NewRouter()
-	if err := http.ListenAndServe(conf.HTTPAddress, r); err != nil {
+	router := api.NewRouter()
+	if err := http.ListenAndServe(conf.HTTPAddress, router); err != nil {
 		panic(err)
 	}
 }
 
-func plugin() (*fk.Conf, fk.Plugin) {
-	var conf fk.Conf
-	fk.LoadEnvConf(&conf)
-	switch conf.Plug {
+func plugin() (*conf.Conf, plug.Plugin) {
+	var cfg conf.Conf
+	conf.LoadEnvConf(&cfg)
+	switch cfg.Plug {
 	case "jira":
-		return &conf, fk.NewJira(&conf)
+		return &cfg, plug.NewJira(&cfg)
 	default:
-		return &conf, fk.NewJira(&conf)
+		return &cfg, plug.NewJira(&cfg)
 	}
 }

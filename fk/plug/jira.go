@@ -1,4 +1,4 @@
-package fk
+package plug
 
 import (
 	"crypto/tls"
@@ -6,7 +6,10 @@ import (
 	"reflect"
 	"strings"
 
-	jira "github.com/andygrunwald/go-jira"
+	"github.com/andygrunwald/go-jira"
+	"github.com/golovers/fktools/fk/conf"
+	"github.com/golovers/fktools/fk/types"
+	"github.com/golovers/fktools/fk/utils"
 )
 
 var jiraFields = map[string]string{
@@ -35,22 +38,22 @@ var jiraFields = map[string]string{
 
 // Jira plugin for JIRA
 type Jira struct {
-	conf *Conf
+	cfg *conf.Conf
 }
 
 // NewJira return a new jira config
-func NewJira(conf *Conf) *Jira {
-	for k, v := range conf.FieldsMapping {
+func NewJira(cfg *conf.Conf) *Jira {
+	for k, v := range cfg.FieldsMapping {
 		jiraFields[k] = v
 	}
 	return &Jira{
-		conf: conf,
+		cfg: cfg,
 	}
 }
 
-// AllIssues return all issues base on the configured BaseQuery
-func (jr *Jira) AllIssues() (Issues, error) {
-	issues := make([]*Issue, 0)
+// AllIssues return all iss base on the configured BaseQuery
+func (jr *Jira) AllIssues() (types.Issues, error) {
+	issues := make([]*types.Issue, 0)
 	start := 0
 	max := 200
 
@@ -59,7 +62,7 @@ func (jr *Jira) AllIssues() (Issues, error) {
 		fields = append(fields, v)
 	}
 	for {
-		jrIssues, _, err := jr.client().Issue.Search(jr.conf.BaseQuery, &jira.SearchOptions{
+		jrIssues, _, err := jr.client().Issue.Search(jr.cfg.BaseQuery, &jira.SearchOptions{
 			StartAt:    start,
 			MaxResults: max,
 			Fields:     fields,
@@ -78,7 +81,7 @@ func (jr *Jira) AllIssues() (Issues, error) {
 	}
 }
 
-func (jr *Jira) toIssue(issue jira.Issue) *Issue {
+func (jr *Jira) toIssue(issue jira.Issue) *types.Issue {
 	epic, _ := issue.Fields.Unknowns.String(jiraFields["epic"])
 	sprint := jr.sprint(issue)
 	storyPoint := jr.floatVal(issue, jiraFields["storypoint"])
@@ -88,7 +91,7 @@ func (jr *Jira) toIssue(issue jira.Issue) *Issue {
 	for _, vv := range val.([]interface{}) {
 		versions = append(versions, vv.(map[string]interface{})["name"].(string))
 	}
-	return &Issue{
+	return &types.Issue{
 		IssueType:            issue.Fields.Type.Name,
 		Key:                  issue.Key,
 		Status:               issue.Fields.Status.Name,
@@ -102,10 +105,10 @@ func (jr *Jira) toIssue(issue jira.Issue) *Issue {
 		AffectsVersions:      versions,
 		Assignee:             toAssignee(issue.Fields.Assignee),
 		Components:           toComponents(issue.Fields.Components),
-		Created:              StringToTime(issue.Fields.Created),
+		Created:              utils.StringToTime(issue.Fields.Created),
 		Labels:               issue.Fields.Labels,
 		Resolution:           toResolution(issue.Fields.Resolution),
-		Resolved:             StringToTime(issue.Fields.Resolutiondate),
+		Resolved:             utils.StringToTime(issue.Fields.Resolutiondate),
 		TimeOriginalEstimate: issue.Fields.TimeOriginalEstimate,
 		TimeEstimate:         issue.Fields.TimeEstimate,
 		TimeSpent:            issue.Fields.TimeSpent,
@@ -117,11 +120,11 @@ func (jr *Jira) client() *jira.Client {
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
 	client := &http.Client{Transport: tr}
-	jiraClient, err := jira.NewClient(client, jr.conf.Host)
+	jiraClient, err := jira.NewClient(client, jr.cfg.Host)
 	if err != nil {
 		panic(err)
 	}
-	jiraClient.Authentication.SetBasicAuth(jr.conf.Username, jr.conf.Password)
+	jiraClient.Authentication.SetBasicAuth(jr.cfg.Username, jr.cfg.Password)
 	return jiraClient
 }
 
@@ -172,31 +175,10 @@ func toResolution(r *jira.Resolution) string {
 	return r.Name
 }
 
-func timeSpent(t *jira.TimeTracking) int {
-	if t == nil {
-		return 0
-	}
-	return t.TimeSpentSeconds
-}
-
-func timeOriginal(t *jira.TimeTracking) int {
-	if t == nil {
-		return 0
-	}
-	return t.OriginalEstimateSeconds
-}
-
-func timeRemaining(t *jira.TimeTracking) int {
-	if t == nil {
-		return 0
-	}
-	return t.RemainingEstimateSeconds
-}
-
 func (jr *Jira) sprint(issue jira.Issue) string {
-	vsprint, _ := issue.Fields.Unknowns.Value(jiraFields["sprint"])
-	if vsprint != nil {
-		val, _ := reflect.ValueOf(vsprint).Index(0).Interface().(string)
+	sprintVal, _ := issue.Fields.Unknowns.Value(jiraFields["sprint"])
+	if sprintVal != nil {
+		val, _ := reflect.ValueOf(sprintVal).Index(0).Interface().(string)
 		vals := strings.Split(val, ",")
 		for _, v := range vals {
 			kv := strings.Split(v, "=")
