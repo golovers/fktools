@@ -7,9 +7,9 @@ import (
 	"strings"
 
 	"github.com/andygrunwald/go-jira"
-	"github.com/golovers/fktools/fk/conf"
-	"github.com/golovers/fktools/fk/types"
-	"github.com/golovers/fktools/fk/utils"
+	"github.com/golovers/kiki/backend/conf"
+	"github.com/golovers/kiki/backend/types"
+	"github.com/golovers/kiki/backend/utils"
 )
 
 var jiraFields = map[string]string{

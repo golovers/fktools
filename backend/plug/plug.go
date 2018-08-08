@@ -1,7 +1,7 @@
 package plug
 
 import (
-	"github.com/golovers/fktools/fk/types"
+	"github.com/golovers/kiki/backend/types"
 )
 
 var plug Plugin

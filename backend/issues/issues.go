@@ -1,6 +1,6 @@
-package iss
+package issues
 
-import "github.com/golovers/fktools/fk/types"
+import "github.com/golovers/kiki/backend/types"
 
 var svc IssueSvc
 

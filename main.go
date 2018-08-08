@@ -3,14 +3,13 @@ package main
 import (
 	"net/http"
 
-	"github.com/golovers/fktools/fk/api"
-	"github.com/golovers/fktools/fk/conf"
-	"github.com/golovers/fktools/fk/db"
-	"github.com/golovers/fktools/fk/iss"
-	"github.com/golovers/fktools/fk/plug"
-	"github.com/golovers/fktools/fk/rules"
-	"github.com/golovers/fktools/fk/sched"
-	"github.com/golovers/fktools/fk/trans"
+	"github.com/golovers/kiki/api"
+	"github.com/golovers/kiki/backend/conf"
+	"github.com/golovers/kiki/backend/db"
+	"github.com/golovers/kiki/backend/issues"
+	"github.com/golovers/kiki/backend/plug"
+	"github.com/golovers/kiki/backend/sched"
+	"github.com/golovers/kiki/backend/trans"
 )
 
 func main() {
@@ -25,17 +24,14 @@ func main() {
 	db.SetDatabase(ldb)
 
 	trans.SetTransformer(trans.NewSimTrans())
-	iss.SetIssueSvc(iss.NewSimIssueSvc())
-	rules.SetRuleSvc(rules.NewSimRuleSvc())
+	issues.SetIssueSvc(issues.NewSimIssueSvc())
 
 	sched.SetScheduler(sched.NewCronScheduler())
 	sched.Start()
 	defer sched.Stop()
 
-	api.SchedSync(conf.SyncSched)
-	go iss.Sync()
-
-	api.SchedRules()
+	//api.SchedSync(conf.SyncSched)
+	go issues.Sync()
 
 	router := api.NewRouter()
 	if err := http.ListenAndServe(conf.HTTPAddress, router); err != nil {

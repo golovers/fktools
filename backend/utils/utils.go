@@ -45,3 +45,27 @@ func StringsToString(s []string) string {
 func EscapeSpecialChars(s string) string {
 	return strings.Replace(s, "\"", "\\\"", -1)
 }
+
+func OneOf(v string, values ...string) bool {
+	for _, val := range values {
+		if v == val {
+			return true
+		}
+	}
+	return false
+}
+
+// MergeFloat64Maps merge multiple maps together
+func MergeFloat64Maps(maps ...map[string]float64) map[string]float64 {
+	rs := make(map[string]float64)
+	for _, m := range maps {
+		for k, v := range m {
+			if _, ok := rs[k]; ok {
+				rs[k] += v
+				continue
+			}
+			rs[k] = v
+		}
+	}
+	return rs
+}

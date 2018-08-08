@@ -1,12 +1,12 @@
-package iss
+package issues
 
 import (
 	"encoding/json"
 
-	"github.com/golovers/fktools/fk/db"
-	"github.com/golovers/fktools/fk/plug"
-	"github.com/golovers/fktools/fk/trans"
-	"github.com/golovers/fktools/fk/types"
+	"github.com/golovers/kiki/backend/db"
+	"github.com/golovers/kiki/backend/plug"
+	"github.com/golovers/kiki/backend/trans"
+	"github.com/golovers/kiki/backend/types"
 	"github.com/sirupsen/logrus"
 )
 

@@ -1,8 +1,8 @@
 package trans
 
 import (
-	"github.com/golovers/fktools/fk/types"
-	"github.com/golovers/fktools/fk/utils"
+	"github.com/golovers/kiki/backend/types"
+	"github.com/golovers/kiki/backend/utils"
 )
 
 type simTransformer struct{}
