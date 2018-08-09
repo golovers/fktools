@@ -1,12 +1,9 @@
 package reports
 
 import (
-	"strings"
-
 	"github.com/golovers/kiki/backend/issues"
 
 	"github.com/golovers/kiki/backend/types"
-	"github.com/golovers/kiki/backend/utils"
 )
 
 type reportSvc struct {
@@ -17,52 +14,7 @@ func NewSimReport() Reports {
 	return &reportSvc{}
 }
 
-type FilterFunc func(issue *types.Issue) bool
 type AggrFunc func(issue *types.Issue) float64
-
-var defectFilter = func(issue *types.Issue) bool {
-	return utils.OneOf(strings.ToLower(issue.IssueType), "defect", "bug")
-}
-
-var storyFilter = func(issue *types.Issue) bool {
-	return utils.OneOf(strings.ToLower(issue.IssueType), "story", "improvement", "enhancement")
-}
-
-var teamSprintStoryFilter = func(team string, sprint string) FilterFunc {
-	return func(issue *types.Issue) bool {
-		if !storyFilter(issue) {
-			return false
-		}
-		if team != "*" && !utils.OneOf(team, issue.Labels...) {
-			return false
-		}
-		if sprint != "*" && strings.ToLower(sprint) != strings.ToLower(issue.Sprint) {
-			return false
-		}
-		return true
-	}
-}
-
-var epicFilter = func(epic string) FilterFunc {
-	return func(issue *types.Issue) bool {
-		if epic != "*" && epic != issue.EpicLink {
-			return false
-		}
-		return true
-	}
-}
-
-var multipleFilters = func(filters ...FilterFunc) FilterFunc {
-	return func(issue *types.Issue) bool {
-		for _, f := range filters {
-			ok := f(issue)
-			if !ok {
-				return false
-			}
-		}
-		return true
-	}
-}
 
 var aggrCount = func(issue *types.Issue) float64 {
 	return 1.0
@@ -112,27 +64,20 @@ func (svc *reportSvc) Stories(filters ...FilterFunc) *StoryStatus {
 
 func (svc *reportSvc) Sprint(sprint string, teams ...string) TeamSprintStatus {
 	rs := make(TeamSprintStatus)
-	rs["_all"] = SprintStatus{
-		Defects: svc.Defects(teamSprintStoryFilter("*", sprint)),
-		Stories: svc.Stories(teamSprintStoryFilter("*", sprint)),
+	rs["_all_"] = SprintStatus{
+		Defects: svc.Defects(teamSprintDefectFilter(sprint, "*")),
+		Stories: svc.Stories(teamSprintStoryFilter(sprint, "*")),
 	}
 	for _, team := range teams {
 		rs[team] = SprintStatus{
-			Defects: svc.Defects(teamSprintStoryFilter(team, sprint)),
-			Stories: svc.Stories(teamSprintStoryFilter(team, sprint)),
+			Defects: svc.Defects(teamSprintDefectFilter(sprint, team)),
+			Stories: svc.Stories(teamSprintStoryFilter(sprint, team)),
 		}
 	}
-	otherTeamsFilter := func(issue *types.Issue) bool {
-		for _, team := range teams {
-			if teamSprintStoryFilter(team, sprint)(issue) {
-				return false
-			}
-		}
-		return true
-	}
-	rs["other"] = SprintStatus{
-		Defects: svc.Defects(otherTeamsFilter),
-		Stories: svc.Stories(otherTeamsFilter),
+
+	rs["_other_"] = SprintStatus{
+		Defects: svc.Defects(otherTeamsSprintDefectFilter(sprint, teams)),
+		Stories: svc.Stories(otherTeamsSprintStoryFilter(sprint, teams)),
 	}
 	return rs
 }

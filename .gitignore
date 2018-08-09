@@ -1,5 +1,5 @@
 .vscode/**
 debug
-fk.db/**
+*.db/**
 *.env
 *.csv
