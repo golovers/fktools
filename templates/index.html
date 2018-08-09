@@ -1,0 +1,66 @@
+{{ range $key, $value := . }}
+<h2>{{ $key }}</h2>
+<h3>Defects (count)</h3>
+{{with $value}}
+{{with .Defects}} 
+<table class="table table-hover">
+    <tr>
+        <th>Priority/Status</th>
+        <th>Open</th>
+        <th>In Progress</th>
+        <th>Resolved</th>
+        <th>Reopened</th>
+        <th>Closed</th>
+        <th>Total Not-Closed</th>
+    </tr>
+    <tr>
+        <td>Critical</td>
+        <td>{{.Critical.Open}}</td>
+        <td>{{.Critical.InProgress}}</td>
+        <td>{{.Critical.Resolved}}</td>
+        <td>{{.Critical.Reopened}}</td>
+        <td>{{.Critical.Closed}}</td>
+        <td>{{sum .Critical.Open .Critical.InProgress .Critical.Resolved .Critical.Reopened}}</td>
+    </tr>
+    <tr>
+        <td>Major</td>
+        <td>{{.Major.Open}}</td>
+        <td>{{.Major.InProgress}}</td>
+        <td>{{.Major.Resolved}}</td>
+        <td>{{.Major.Reopened}}</td>
+        <td>{{.Major.Closed}}</td>
+        <td>{{sum .Major.Open .Major.InProgress .Major.Resolved .Major.Reopened}}</td>
+    </tr>
+    <tr>
+        <td>Minor</td>
+        <td>{{.Minor.Open}}</td>
+        <td>{{.Minor.InProgress}}</td>
+        <td>{{.Minor.Resolved}}</td>
+        <td>{{.Minor.Reopened}}</td>
+        <td>{{.Minor.Closed}}</td>
+        <td>{{sum .Minor.Open .Minor.InProgress .Minor.Resolved .Minor.Reopened}}</td>
+    </tr>
+</table>
+{{ end }}      
+<h3>Story (story points)</h3>
+{{ with .Stories }} 
+<table class="table table-hover">
+    <tr>
+        <th>Open</th>
+        <th>In Progress</th>
+        <th>Resolved</th>
+        <th>Reopened</th>
+        <th>Closed</th>
+    </tr>
+    <tr>
+        <td>{{.Points.Open}}</td>
+        <td>{{.Points.InProgress}}</td>
+        <td>{{.Points.Resolved}}</td>
+        <td>{{.Points.Reopened}}</td>
+        <td>{{.Points.Closed}}</td>
+    </tr>
+</table>
+{{ end }}                
+{{ end }}
+<hr>
+{{ end}}

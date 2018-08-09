@@ -2,7 +2,6 @@ package api
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strings"
 
@@ -11,7 +10,9 @@ import (
 
 // Index write index info
 func Index(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "kiki")
+	//TODO will update soon
+	status := reports.Sprint("Sprint 18", "ce-team-1", "ce-team-2", "doraemon", "onion", "scrum-team-3")
+	indexTmpl.Execute(w, r, status)
 }
 
 // DefectStatus provide defect status over entire the backlog
@@ -66,4 +67,12 @@ func writeErr(w http.ResponseWriter, code int, err string) {
 type errMsg struct {
 	Code  int
 	Error string
+}
+
+type appHandler func(http.ResponseWriter, *http.Request) *appError
+
+type appError struct {
+	Error   error
+	Message string
+	Code    int
 }
