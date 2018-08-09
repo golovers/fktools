@@ -30,8 +30,7 @@ func (s *simSvc) Load() (types.Issues, error) {
 	if err != nil {
 		return types.Issues{}, err
 	}
-	transform(issues)
-	return issues, nil
+	return transform(issues), nil
 }
 
 // Sync sync data from remote to local for later use
@@ -54,8 +53,11 @@ func saveIssues(issues types.Issues) {
 	db.Put(keyIssue, data)
 }
 
-func transform(issues types.Issues) {
+func transform(issues types.Issues) types.Issues {
+	rs := make(types.Issues, 0)
 	for _, issue := range issues {
-		issue = trans.Transform(*issue)
+		nw := trans.Transform(*issue)
+		rs = append(rs, nw)
 	}
+	return rs
 }

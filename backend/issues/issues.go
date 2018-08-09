@@ -1,6 +1,7 @@
 package issues
 
 import "github.com/golovers/kiki/backend/types"
+import "github.com/golovers/kiki/backend/sched"
 
 var svc IssueSvc
 
@@ -19,4 +20,8 @@ func Load() (types.Issues, error) {
 
 func Sync() {
 	svc.Sync()
+}
+
+func SchedSync(spec string) {
+	sched.Schedule(spec, Sync)
 }

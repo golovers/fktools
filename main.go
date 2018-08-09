@@ -8,6 +8,7 @@ import (
 	"github.com/golovers/kiki/backend/db"
 	"github.com/golovers/kiki/backend/issues"
 	"github.com/golovers/kiki/backend/plug"
+	"github.com/golovers/kiki/backend/reports"
 	"github.com/golovers/kiki/backend/sched"
 	"github.com/golovers/kiki/backend/trans"
 )
@@ -30,8 +31,9 @@ func main() {
 	sched.Start()
 	defer sched.Stop()
 
-	//api.SchedSync(conf.SyncSched)
+	reports.SetReports(reports.NewSimReport())
 	go issues.Sync()
+	go issues.SchedSync(conf.SyncSched)
 
 	router := api.NewRouter()
 	if err := http.ListenAndServe(conf.HTTPAddress, router); err != nil {

@@ -46,9 +46,10 @@ func EscapeSpecialChars(s string) string {
 	return strings.Replace(s, "\"", "\\\"", -1)
 }
 
+// OneOf check if v is one of the given values, ignore case
 func OneOf(v string, values ...string) bool {
 	for _, val := range values {
-		if v == val {
+		if strings.ToLower(v) == strings.ToLower(val) {
 			return true
 		}
 	}

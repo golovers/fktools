@@ -4,17 +4,17 @@ import "github.com/kelseyhightower/envconfig"
 
 // Conf configurations
 type Conf struct {
-	Plug string `envconfig:"FK_PLUGIN" default:"jira"`
+	Plug string `envconfig:"KIKI_PLUGIN" default:"jira"`
 
-	Host          string            `envconfig:"FK_HOST"`
-	Username      string            `envconfig:"FK_USERNAME"`
-	Password      string            `envconfig:"FK_PASSWORD"`
-	FieldsMapping map[string]string `envconfig:"FK_FIELD_MAPPING"`
-	BaseQuery     string            `envconfig:"FK_BASE_QUERY"`
+	Host          string            `envconfig:"KIKI_HOST"`
+	Username      string            `envconfig:"KIKI_USERNAME"`
+	Password      string            `envconfig:"KIKI_PASSWORD"`
+	FieldsMapping map[string]string `envconfig:"KIKI_FIELD_MAPPING"`
+	BaseQuery     string            `envconfig:"KIKI_BASE_QUERY"`
 
-	HTTPAddress string `envconfig:"FK_HTTP_ADDRESS" default:":8080"`
-	SyncSched   string `envconfig:"FK_SYNC_SCHED" default:"@every 5m"`
-	DBName      string `envconfig:"FK_DB_NAME" default:"fk.db"`
+	HTTPAddress string `envconfig:"KIKI_HTTP_ADDRESS" default:":8080"`
+	SyncSched   string `envconfig:"KIKI_SYNC_SCHED" default:"@every 5m"`
+	DBName      string `envconfig:"KIKI_DB_NAME" default:"kiki.db"`
 }
 
 // LoadEnvConf load configurations from config file

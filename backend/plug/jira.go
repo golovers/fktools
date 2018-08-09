@@ -189,3 +189,8 @@ func (jr *Jira) sprint(issue jira.Issue) string {
 	}
 	return ""
 }
+
+func (jr *Jira) CurrSprint() (string, error) {
+	//TODO implement me
+	return "Sprint 18", nil
+}

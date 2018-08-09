@@ -3,15 +3,32 @@ package reports
 import (
 	"strings"
 
-	"github.com/golovers/kiki/backend/types"
-	"github.com/golovers/kiki/backend/utils"
+	"github.com/sirupsen/logrus"
 )
+
+type Reports interface {
+	Defects(filters ...FilterFunc) *PriorityAndStatus
+	Stories(filters ...FilterFunc) *StoryStatus
+	Sprint(sprint string, teams ...string) TeamSprintStatus
+}
+
+type TeamSprintStatus map[string]SprintStatus
+
+type SprintStatus struct {
+	Defects *PriorityAndStatus
+	Stories *StoryStatus
+}
 
 // PriorityAndStatus priority and status in two dementions values
 type PriorityAndStatus struct {
 	Critical *StatusSummary
 	Major    *StatusSummary
 	Minor    *StatusSummary
+}
+
+type StoryStatus struct {
+	Count  *StatusSummary
+	Points *StatusSummary
 }
 
 // Overview return Overview status by summing values of the 2 dimentions values base on status of the issue
@@ -27,6 +44,8 @@ func (ps *PriorityAndStatus) update(pri string, status string, v float64) {
 		ps.Major.update(status, v)
 	case "minor":
 		ps.Minor.update(status, v)
+	default:
+		logrus.Errorf("not supported priority: %s", pri)
 	}
 }
 
@@ -56,6 +75,8 @@ func (ov *StatusSummary) update(status string, v float64) {
 		ov.Resolved += v
 	case "closed":
 		ov.Closed += v
+	default:
+		logrus.Infof("not supported status: %s", status)
 	}
 }
 
@@ -75,46 +96,23 @@ func (ov *StatusSummary) Merge(o *StatusSummary) *StatusSummary {
 	}
 }
 
-type reportSvc struct {
-	issues types.Issues
+var svc Reports
+
+// SetReports set report service
+func SetReports(s Reports) {
+	svc = s
 }
 
-type filterFunc func(issue *types.Issue) bool
-type aggrFunc func(issue *types.Issue) float64
-
-var defectFilter = func(issue *types.Issue) bool {
-	return utils.OneOf(strings.ToLower(issue.IssueType), "defect", "bug")
+// Defects defect status by priority and status
+func Defects() *PriorityAndStatus {
+	return svc.Defects()
 }
 
-var storyFilter = func(issue *types.Issue) bool {
-	return utils.OneOf(strings.ToLower(issue.IssueType), "story", "improvement", "enhancement")
+// Stories story status by priority and status
+func Stories() *StoryStatus {
+	return svc.Stories()
 }
 
-var aggrCount = func(issue *types.Issue) float64 {
-	return 1.0
-}
-var aggrStoryPoints = func(issue *types.Issue) float64 {
-	return issue.StoryPoints
-}
-
-func (svc *reportSvc) Status(filter filterFunc, aggr aggrFunc) *PriorityAndStatus {
-	status := &PriorityAndStatus{}
-	for _, issue := range svc.issues {
-		if filter(issue) {
-			status.update(issue.Priority, issue.Status, aggr(issue))
-		}
-	}
-	return status
-}
-
-func (svc *reportSvc) DefectCountStatus() *PriorityAndStatus {
-	return svc.Status(defectFilter, aggrCount)
-}
-
-func (svc *reportSvc) StoryPriorityCountStatus() *PriorityAndStatus {
-	return svc.Status(storyFilter, aggrCount)
-}
-
-func (svc *reportSvc) StoryPriorityStoryPointStatus() *PriorityAndStatus {
-	return svc.Status(storyFilter, aggrStoryPoints)
+func Sprint(sprint string, teams ...string) TeamSprintStatus {
+	return svc.Sprint(sprint, teams...)
 }

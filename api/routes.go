@@ -30,6 +30,24 @@ var routes = Routes{
 		"/",
 		Index,
 	},
+	Route{
+		Name:        "Get defect status for whole backlog",
+		Method:      "GET",
+		Pattern:     "/api/defects/status",
+		HandlerFunc: DefectStatus,
+	},
+	Route{
+		Name:        "Get stories status for whole backlog",
+		Method:      "GET",
+		Pattern:     "/api/stories/status",
+		HandlerFunc: StoryStatus,
+	},
+	Route{
+		Name:        "sprint status with details for each teams",
+		Method:      "GET",
+		Pattern:     "/api/sprint/status",
+		HandlerFunc: SprintStatus,
+	},
 }
 
 // NewRouter return a new router with middlewares registered
