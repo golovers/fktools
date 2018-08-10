@@ -63,19 +63,22 @@ func (svc *reportSvc) Stories(filters ...FilterFunc) *StoryStatus {
 }
 
 func (svc *reportSvc) Sprint(sprint string, teams ...string) TeamSprintStatus {
-	rs := make(TeamSprintStatus)
-	rs["_all_"] = SprintStatus{
+	rs := TeamSprintStatus{
+		Sprint:     sprint,
+		TeamStatus: make(map[string]SprintStatus),
+	}
+	rs.TeamStatus["z_total_z"] = SprintStatus{
 		Defects: svc.Defects(teamSprintDefectFilter(sprint, "*")),
 		Stories: svc.Stories(teamSprintStoryFilter(sprint, "*")),
 	}
 	for _, team := range teams {
-		rs[team] = SprintStatus{
+		rs.TeamStatus[team] = SprintStatus{
 			Defects: svc.Defects(teamSprintDefectFilter(sprint, team)),
 			Stories: svc.Stories(teamSprintStoryFilter(sprint, team)),
 		}
 	}
 
-	rs["_other_"] = SprintStatus{
+	rs.TeamStatus["z_other_z"] = SprintStatus{
 		Defects: svc.Defects(otherTeamsSprintDefectFilter(sprint, teams)),
 		Stories: svc.Stories(otherTeamsSprintStoryFilter(sprint, teams)),
 	}

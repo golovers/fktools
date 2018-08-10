@@ -12,7 +12,10 @@ type Reports interface {
 	Sprint(sprint string, teams ...string) TeamSprintStatus
 }
 
-type TeamSprintStatus map[string]SprintStatus
+type TeamSprintStatus struct {
+	Sprint     string
+	TeamStatus map[string]SprintStatus
+}
 
 type SprintStatus struct {
 	Defects *PriorityAndStatus

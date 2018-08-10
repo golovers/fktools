@@ -10,8 +10,14 @@ import (
 
 // Index write index info
 func Index(w http.ResponseWriter, r *http.Request) {
-	//TODO will update soon
-	status := reports.Sprint("Sprint 18", "ce-team-1", "ce-team-2", "doraemon", "onion", "scrum-team-3")
+	sprint, teams := sprintAndTeamFromRequest(r)
+	if sprint == "" {
+		sprint = "*"
+	}
+	status := reports.Sprint(sprint, teams...)
+	if sprint == "*" {
+		status.Sprint = "All Sprints"
+	}
 	indexTmpl.Execute(w, r, status)
 }
 
@@ -38,9 +44,7 @@ func StoryStatus(w http.ResponseWriter, r *http.Request) {
 
 //SprintStatus provide status of sprints which will have details report for each teams
 func SprintStatus(w http.ResponseWriter, r *http.Request) {
-	vars := r.URL.Query()
-	sprint := vars.Get("sprint")
-	teams := strings.Split(vars.Get("teams"), ",")
+	sprint, teams := sprintAndTeamFromRequest(r)
 	if sprint == "" {
 		writeErr(w, http.StatusInternalServerError, "sprint is required")
 		return
@@ -52,6 +56,13 @@ func SprintStatus(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Write(data)
+}
+
+func sprintAndTeamFromRequest(r *http.Request) (sprint string, teams []string) {
+	vars := r.URL.Query()
+	sprint = vars.Get("sprint")
+	teams = strings.Split(vars.Get("teams"), ",")
+	return
 }
 
 func writeErr(w http.ResponseWriter, code int, err string) {
