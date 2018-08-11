@@ -14,15 +14,6 @@ func NewSimReport() Reports {
 	return &reportSvc{}
 }
 
-type AggrFunc func(issue *types.Issue) float64
-
-var aggrCount = func(issue *types.Issue) float64 {
-	return 1.0
-}
-var aggrStoryPoints = func(issue *types.Issue) float64 {
-	return issue.StoryPoints
-}
-
 func (svc *reportSvc) Issues() types.Issues {
 	issues, err := issues.Load()
 	if err != nil {

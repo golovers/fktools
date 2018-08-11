@@ -70,3 +70,13 @@ func MergeFloat64Maps(maps ...map[string]float64) map[string]float64 {
 	}
 	return rs
 }
+
+//AnyOf return true if any values of vals is '*' or match with any values of otherVals
+func AnyOf(vals []string, otherVals ...string) bool {
+	for _, v := range vals {
+		if v == "*" || OneOf(v, otherVals...) {
+			return true
+		}
+	}
+	return false
+}
