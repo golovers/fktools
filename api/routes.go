@@ -48,6 +48,12 @@ var routes = Routes{
 		Pattern:     "/api/sprint/status",
 		HandlerFunc: SprintStatus,
 	},
+	Route{
+		Name:        "status of epic",
+		Method:      "GET",
+		Pattern:     "/epic",
+		HandlerFunc: epicStatus,
+	},
 }
 
 // NewRouter return a new router with middlewares registered

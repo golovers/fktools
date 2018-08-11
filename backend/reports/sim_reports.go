@@ -1,6 +1,9 @@
 package reports
 
 import (
+	"fmt"
+	"strings"
+
 	"github.com/golovers/kiki/backend/issues"
 
 	"github.com/golovers/kiki/backend/types"
@@ -23,18 +26,25 @@ func (svc *reportSvc) Issues() types.Issues {
 }
 
 func (svc *reportSvc) status(aggr AggrFunc, filters ...FilterFunc) *PriorityAndStatus {
+	status, _ := svc.statusAndIssues(aggr, filters...)
+	return status
+}
+
+func (svc *reportSvc) statusAndIssues(aggr AggrFunc, filters ...FilterFunc) (*PriorityAndStatus, types.Issues) {
 	status := &PriorityAndStatus{
 		Critical: &StatusSummary{},
 		Major:    &StatusSummary{},
 		Minor:    &StatusSummary{},
 	}
+	filIssues := make(types.Issues, 0)
 	cbFilters := multipleFilters(filters...)
 	for _, issue := range svc.Issues() {
 		if cbFilters(issue) {
+			filIssues = append(filIssues, issue)
 			status.update(issue.Priority, issue.Status, aggr(issue))
 		}
 	}
-	return status
+	return status, filIssues
 }
 
 func (svc *reportSvc) Defects(filters ...FilterFunc) *PriorityAndStatus {
@@ -62,16 +72,43 @@ func (svc *reportSvc) Sprint(sprint string, teams ...string) TeamSprintStatus {
 		Defects: svc.Defects(teamSprintDefectFilter(sprint, "*")),
 		Stories: svc.Stories(teamSprintStoryFilter(sprint, "*")),
 	}
+	if len(teams) > 0 && teams[0] == "" {
+		return rs
+	}
 	for _, team := range teams {
 		rs.TeamStatus[team] = SprintStatus{
 			Defects: svc.Defects(teamSprintDefectFilter(sprint, team)),
 			Stories: svc.Stories(teamSprintStoryFilter(sprint, team)),
 		}
 	}
-
 	rs.TeamStatus["z_other_z"] = SprintStatus{
 		Defects: svc.Defects(otherTeamsSprintDefectFilter(sprint, teams)),
 		Stories: svc.Stories(otherTeamsSprintStoryFilter(sprint, teams)),
 	}
 	return rs
+}
+
+type GroupStatus struct {
+	Name          string
+	StoriesStatus *StatusSummary
+	DefectsStatus *PriorityAndStatus
+	Stories       types.Issues
+	Defects       types.Issues
+}
+
+func (svc *reportSvc) groupStatus(filters ...FilterFunc) *GroupStatus {
+	status := new(GroupStatus)
+	storyFilters := append(filters, storyFilter)
+	storyStatus, stories := svc.statusAndIssues(aggrStoryPoints, multipleFilters(storyFilters...))
+	status.StoriesStatus = storyStatus.Overview()
+	status.Stories = stories
+	defectFilters := append(filters, defectFilter)
+	status.DefectsStatus, status.Defects = svc.statusAndIssues(aggrCount, defectFilters...)
+	return status
+}
+
+func (svc *reportSvc) EpicStatus(epic string, fixVersions []string, teams []string, sprint string) *GroupStatus {
+	status := svc.groupStatus(epicFilter(epic), fixVersionsFilter(fixVersions...), oneOfTheseTeams(teams...), sprintFilter(sprint))
+	status.Name = fmt.Sprintf("Epic: %s - FixVersions: %s - Labels: %s - Sprint: %s", epic, strings.Join(fixVersions, ", "), strings.Join(teams, ", "), sprint)
+	return status
 }

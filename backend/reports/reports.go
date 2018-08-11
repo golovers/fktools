@@ -10,6 +10,7 @@ type Reports interface {
 	Defects(filters ...FilterFunc) *PriorityAndStatus
 	Stories(filters ...FilterFunc) *StoryStatus
 	Sprint(sprint string, teams ...string) TeamSprintStatus
+	EpicStatus(epic string, fixVersions []string, teams []string, sprint string) *GroupStatus
 }
 
 type TeamSprintStatus struct {
@@ -118,4 +119,8 @@ func Stories() *StoryStatus {
 
 func Sprint(sprint string, teams ...string) TeamSprintStatus {
 	return svc.Sprint(sprint, teams...)
+}
+
+func EpicStatus(epic string, fixVersions []string, teams []string, sprint string) *GroupStatus {
+	return svc.EpicStatus(epic, fixVersions, teams, sprint)
 }

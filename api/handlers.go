@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/sirupsen/logrus"
+
 	"github.com/golovers/kiki/backend/reports"
 )
 
@@ -19,6 +21,29 @@ func Index(w http.ResponseWriter, r *http.Request) {
 		status.Sprint = "All Sprints"
 	}
 	indexTmpl.Execute(w, r, status)
+}
+
+func epicStatus(w http.ResponseWriter, r *http.Request) {
+	vars := r.URL.Query()
+	sprint := vars.Get("sprint")
+	teams := strings.Split(vars.Get("teams"), ",")
+	epic := vars.Get("epic")
+	fixVersions := strings.Split(vars.Get("fixVersions"), ",")
+	if sprint == "" {
+		sprint = "*"
+	}
+	if len(teams) == 0 {
+		teams = append(teams, "*")
+	}
+	if len(fixVersions) == 0 {
+		fixVersions = append(fixVersions, "*")
+	}
+	if epic == "" {
+		epic = "*"
+	}
+	logrus.Info(epic, fixVersions, teams, sprint)
+	status := reports.EpicStatus(epic, fixVersions, teams, sprint)
+	epicTmpl.Execute(w, r, status)
 }
 
 // DefectStatus provide defect status over entire the backlog

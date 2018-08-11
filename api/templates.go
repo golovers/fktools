@@ -10,6 +10,7 @@ import (
 
 var (
 	indexTmpl = parseTemplate("index.html")
+	epicTmpl  = parseTemplate("epic.html")
 )
 
 // parseTemplate applies a given file to the body of the base template.
