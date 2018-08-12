@@ -2,17 +2,49 @@ package api
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strings"
 
 	"github.com/sirupsen/logrus"
 
+	"github.com/golovers/kiki/backend/links"
 	"github.com/golovers/kiki/backend/reports"
 )
 
-// Index write index info
-func Index(w http.ResponseWriter, r *http.Request) {
-	sprint, teams := sprintAndTeamFromRequest(r)
+func index(w http.ResponseWriter, r *http.Request) {
+	ls := links.Links()
+	logrus.Info("links: ", ls)
+	indexTmpl.Execute(w, r, ls)
+}
+
+func linkConfig(w http.ResponseWriter, r *http.Request) {
+	linksTmpl.Execute(w, r, links.Links())
+}
+
+func addLink(w http.ResponseWriter, r *http.Request) {
+	link := &links.QuickLink{
+		Name:     r.FormValue("name"),
+		Link:     fmt.Sprintf("group?/epic=%s&fixVersions=%s&labels=%s&sprint=%s", r.FormValue("epic"), r.FormValue("fixVersions"), r.FormValue("labels"), r.FormValue("sprint")),
+		Visitted: 0,
+	}
+	logrus.Infof("Link - name: %s, link: %s", link.Name, link.Link)
+	err := links.Add(link)
+	if err != nil {
+		writeErr(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	http.Redirect(w, r, link.Link, http.StatusOK)
+}
+
+func deleteLinks(w http.ResponseWriter, r *http.Request) {
+	links.DeleteAll()
+}
+
+func sprintStatus(w http.ResponseWriter, r *http.Request) {
+	vars := r.URL.Query()
+	sprint := vars.Get("sprint")
+	teams := strings.Split(vars.Get("teams"), ",")
 	if sprint == "" {
 		sprint = "*"
 	}
@@ -20,20 +52,20 @@ func Index(w http.ResponseWriter, r *http.Request) {
 	if sprint == "*" {
 		status.Sprint = "All Sprints"
 	}
-	indexTmpl.Execute(w, r, status)
+	sprintTmpl.Execute(w, r, status)
 }
 
-func epicStatus(w http.ResponseWriter, r *http.Request) {
+func groupStatus(w http.ResponseWriter, r *http.Request) {
 	vars := r.URL.Query()
 	sprint := vars.Get("sprint")
-	teams := strings.Split(vars.Get("teams"), ",")
+	labels := strings.Split(vars.Get("labels"), ",")
 	epic := vars.Get("epic")
 	fixVersions := strings.Split(vars.Get("fixVersions"), ",")
 	if sprint == "" {
 		sprint = "*"
 	}
-	if len(teams) == 0 {
-		teams = append(teams, "*")
+	if len(labels) == 0 {
+		labels = append(labels, "*")
 	}
 	if len(fixVersions) == 0 {
 		fixVersions = append(fixVersions, "*")
@@ -41,53 +73,9 @@ func epicStatus(w http.ResponseWriter, r *http.Request) {
 	if epic == "" {
 		epic = "*"
 	}
-	logrus.Info(epic, fixVersions, teams, sprint)
-	status := reports.EpicStatus(epic, fixVersions, teams, sprint)
+	logrus.Info(epic, fixVersions, labels, sprint)
+	status := reports.EpicStatus(epic, fixVersions, labels, sprint)
 	epicTmpl.Execute(w, r, status)
-}
-
-// DefectStatus provide defect status over entire the backlog
-func DefectStatus(w http.ResponseWriter, r *http.Request) {
-	status := reports.Defects()
-	b, err := json.Marshal(status)
-	if err != nil {
-		writeErr(w, http.StatusInternalServerError, "failed to marshal")
-	}
-	w.Write(b)
-}
-
-//StoryStatus provide stories status over entire the backlog
-func StoryStatus(w http.ResponseWriter, r *http.Request) {
-	status := reports.Stories()
-	b, err := json.Marshal(status)
-	if err != nil {
-		writeErr(w, http.StatusInternalServerError, "failed to marshal")
-		return
-	}
-	w.Write(b)
-}
-
-//SprintStatus provide status of sprints which will have details report for each teams
-func SprintStatus(w http.ResponseWriter, r *http.Request) {
-	sprint, teams := sprintAndTeamFromRequest(r)
-	if sprint == "" {
-		writeErr(w, http.StatusInternalServerError, "sprint is required")
-		return
-	}
-	status := reports.Sprint(sprint, teams...)
-	data, err := json.Marshal(status)
-	if err != nil {
-		writeErr(w, http.StatusInternalServerError, "failed to marshal")
-		return
-	}
-	w.Write(data)
-}
-
-func sprintAndTeamFromRequest(r *http.Request) (sprint string, teams []string) {
-	vars := r.URL.Query()
-	sprint = vars.Get("sprint")
-	teams = strings.Split(vars.Get("teams"), ",")
-	return
 }
 
 func writeErr(w http.ResponseWriter, code int, err string) {

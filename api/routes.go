@@ -24,36 +24,12 @@ type Route struct {
 type Routes []Route
 
 var routes = Routes{
-	Route{
-		"Index",
-		"GET",
-		"/",
-		Index,
-	},
-	Route{
-		Name:        "Get defect status for whole backlog",
-		Method:      "GET",
-		Pattern:     "/api/defects/status",
-		HandlerFunc: DefectStatus,
-	},
-	Route{
-		Name:        "Get stories status for whole backlog",
-		Method:      "GET",
-		Pattern:     "/api/stories/status",
-		HandlerFunc: StoryStatus,
-	},
-	Route{
-		Name:        "sprint status with details for each teams",
-		Method:      "GET",
-		Pattern:     "/api/sprint/status",
-		HandlerFunc: SprintStatus,
-	},
-	Route{
-		Name:        "status of epic",
-		Method:      "GET",
-		Pattern:     "/epic",
-		HandlerFunc: epicStatus,
-	},
+	Route{"Index", "GET", "/", index},
+	Route{"Group Status", "GET", "/group", groupStatus},
+	Route{"Sprint Status", "GET", "/sprint", sprintStatus},
+	Route{"Links Configurations", "GET", "/links", linkConfig},
+	Route{"Add link", "POST", "/links", addLink},
+	Route{"Delete link", "DELETE", "/links", deleteLinks},
 }
 
 // NewRouter return a new router with middlewares registered

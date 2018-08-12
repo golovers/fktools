@@ -1,0 +1,76 @@
+<h2>Summary of {{ .Sprint}}</h2>
+<h3>Stories (SPs)</h3>
+<table class="table table-hover">
+    <tr>
+        <th>Team/Status</th>
+        <th>Open</th>
+        <th>In Progress</th>
+        <th>Resolved</th>
+        <th>Reopened</th>
+        <th>Closed</th>
+    </tr>
+    {{ range $key, $value := .TeamStatus }}
+    <tr>
+        <td> {{ $key }}</td>
+        {{with $value.Stories}}
+        <td>{{ .Points.Open }}</td>
+        <td>{{ .Points.InProgress }}</td>
+        <td>{{ .Points.Resolved }}</td>
+        <td>{{ .Points.Reopened }}</td>
+        <td>{{ .Points.Closed }}</td>
+        {{ end }}
+    </tr>
+    {{ end }}
+</table>
+<h3>Defects (count)</h3>
+<table class="table table-hover">
+    <tr>
+        <th>Priority/Status</th>
+        <th>Open</th>
+        <th>In Progress</th>
+        <th>Resolved</th>
+        <th>Reopened</th>
+        <th>Closed</th>
+        <th>Total Open</th>
+    </tr>
+    {{ with (index .TeamStatus "z_total_z")}}
+    {{with .Defects}}
+    <tr>
+        <td>Critical</td>
+        <td>{{ .Critical.Open }}</td>
+        <td>{{ .Critical.InProgress }}</td>
+        <td>{{ .Critical.Resolved }}</td>
+        <td>{{ .Critical.Reopened }}</td>
+        <td>{{ .Critical.Closed }}</td>
+        <td>{{ sum .Critical.Open .Critical.InProgress .Critical.Resolved .Critical.Reopened}}</td>
+    </tr>
+    <tr>
+        <td> Major</td>
+        <td>{{ .Major.Open }}</td>
+        <td>{{ .Major.InProgress }}</td>
+        <td>{{ .Major.Resolved }}</td>
+        <td>{{ .Major.Reopened }}</td>
+        <td>{{ .Major.Closed }}</td>
+        <td>{{ sum .Major.Open .Major.InProgress .Major.Resolved .Major.Reopened}}</td>
+    </tr>
+    <tr>
+        <td>Minor</td>
+        <td>{{ .Minor.Open }}</td>
+        <td>{{ .Minor.InProgress }}</td>
+        <td>{{ .Minor.Resolved }}</td>
+        <td>{{ .Minor.Reopened }}</td>
+        <td>{{ .Minor.Closed }}</td>
+        <td>{{ sum .Minor.Open .Minor.InProgress .Minor.Resolved .Minor.Reopened}}</td>
+    </tr>
+    <tr>
+        <td>Summary</td>
+        <td>{{ sum .Critical.Open  .Major.Open .Minor.Open}}</td>
+        <td>{{ sum .Critical.InProgress .Major.InProgress .Minor.InProgress}}</td>
+        <td>{{ sum .Critical.Resolved .Major.Resolved .Minor.Resolved}}</td>
+        <td>{{ sum .Critical.Reopened .Major.Reopened .Minor.Reopened }}</td>
+        <td>{{ sum .Critical.Closed .Major.Closed .Minor.Closed }}</td>
+        <td>{{ sum .Critical.Open  .Major.Open .Minor.Open .Critical.InProgress .Major.InProgress .Minor.InProgress .Critical.Resolved .Major.Resolved .Minor.Resolved .Critical.Reopened .Major.Reopened .Minor.Reopened }}</td>
+    </tr>
+    {{ end }}
+    {{ end }}
+</table>

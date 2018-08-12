@@ -63,27 +63,27 @@ func (svc *reportSvc) Stories(filters ...FilterFunc) *StoryStatus {
 	}
 }
 
-func (svc *reportSvc) Sprint(sprint string, teams ...string) TeamSprintStatus {
+func (svc *reportSvc) Sprint(sprint string, labels ...string) TeamSprintStatus {
 	rs := TeamSprintStatus{
 		Sprint:     sprint,
 		TeamStatus: make(map[string]SprintStatus),
 	}
 	rs.TeamStatus["z_total_z"] = SprintStatus{
-		Defects: svc.Defects(teamSprintDefectFilter(sprint, "*")),
-		Stories: svc.Stories(teamSprintStoryFilter(sprint, "*")),
+		Defects: svc.Defects(labelSprintDefectFilter(sprint, "*")),
+		Stories: svc.Stories(labelSprintStoryFilter(sprint, "*")),
 	}
-	if len(teams) > 0 && teams[0] == "" {
+	if len(labels) > 0 && labels[0] == "" {
 		return rs
 	}
-	for _, team := range teams {
-		rs.TeamStatus[team] = SprintStatus{
-			Defects: svc.Defects(teamSprintDefectFilter(sprint, team)),
-			Stories: svc.Stories(teamSprintStoryFilter(sprint, team)),
+	for _, label := range labels {
+		rs.TeamStatus[label] = SprintStatus{
+			Defects: svc.Defects(labelSprintDefectFilter(sprint, label)),
+			Stories: svc.Stories(labelSprintStoryFilter(sprint, label)),
 		}
 	}
 	rs.TeamStatus["z_other_z"] = SprintStatus{
-		Defects: svc.Defects(otherTeamsSprintDefectFilter(sprint, teams)),
-		Stories: svc.Stories(otherTeamsSprintStoryFilter(sprint, teams)),
+		Defects: svc.Defects(otherLabelsSprintDefectFilter(sprint, labels)),
+		Stories: svc.Stories(otherLabelsSprintStoryFilter(sprint, labels)),
 	}
 	return rs
 }
@@ -107,8 +107,8 @@ func (svc *reportSvc) groupStatus(filters ...FilterFunc) *GroupStatus {
 	return status
 }
 
-func (svc *reportSvc) EpicStatus(epic string, fixVersions []string, teams []string, sprint string) *GroupStatus {
-	status := svc.groupStatus(epicFilter(epic), fixVersionsFilter(fixVersions...), oneOfTheseTeams(teams...), sprintFilter(sprint))
-	status.Name = fmt.Sprintf("Epic: %s - FixVersions: %s - Labels: %s - Sprint: %s", epic, strings.Join(fixVersions, ", "), strings.Join(teams, ", "), sprint)
+func (svc *reportSvc) EpicStatus(epic string, fixVersions []string, labels []string, sprint string) *GroupStatus {
+	status := svc.groupStatus(epicFilter(epic), fixVersionsFilter(fixVersions...), oneOfTheseLabels(labels...), sprintFilter(sprint))
+	status.Name = fmt.Sprintf("Epic: %s - FixVersions: %s - Labels: %s - Sprint: %s", epic, strings.Join(fixVersions, ", "), strings.Join(labels, ", "), sprint)
 	return status
 }

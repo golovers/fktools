@@ -7,6 +7,7 @@ import (
 	"github.com/golovers/kiki/backend/conf"
 	"github.com/golovers/kiki/backend/db"
 	"github.com/golovers/kiki/backend/issues"
+	"github.com/golovers/kiki/backend/links"
 	"github.com/golovers/kiki/backend/plug"
 	"github.com/golovers/kiki/backend/reports"
 	"github.com/golovers/kiki/backend/sched"
@@ -30,6 +31,7 @@ func main() {
 	sched.SetScheduler(sched.NewCronScheduler())
 	sched.Start()
 	defer sched.Stop()
+	links.SetLinkSvc(links.NewSimLinkSvc())
 
 	reports.SetReports(reports.NewSimReport())
 	go issues.Sync()

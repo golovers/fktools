@@ -24,14 +24,14 @@ var storyFilter = func(issue *types.Issue) bool {
 	return utils.OneOf(strings.ToLower(issue.IssueType), "story", "improvement", "enhancement")
 }
 
-var oneOfTheseTeams = func(teams ...string) FilterFunc {
+var oneOfTheseLabels = func(labels ...string) FilterFunc {
 	return func(issue *types.Issue) bool {
-		return utils.AnyOf(teams, issue.Labels...)
+		return utils.AnyOf(labels, issue.Labels...)
 	}
 }
 
-var notTheseTeamsFilter = func(teams ...string) FilterFunc {
-	return reverseFilter(oneOfTheseTeams(teams...))
+var notTheseLabelsFilter = func(labels ...string) FilterFunc {
+	return reverseFilter(oneOfTheseLabels(labels...))
 }
 
 var sprintFilter = func(sprint string) FilterFunc {
@@ -40,28 +40,28 @@ var sprintFilter = func(sprint string) FilterFunc {
 	}
 }
 
-var teamSprintFilter = func(issueTypeFilter FilterFunc, sprint string, team string) FilterFunc {
-	return multipleFilters(issueTypeFilter, sprintFilter(sprint), oneOfTheseTeams(team))
+var labelSprintFilter = func(issueTypeFilter FilterFunc, sprint string, label string) FilterFunc {
+	return multipleFilters(issueTypeFilter, sprintFilter(sprint), oneOfTheseLabels(label))
 }
 
-var teamSprintStoryFilter = func(sprint string, team string) FilterFunc {
-	return teamSprintFilter(storyFilter, sprint, team)
+var labelSprintStoryFilter = func(sprint string, label string) FilterFunc {
+	return labelSprintFilter(storyFilter, sprint, label)
 }
 
-var teamSprintDefectFilter = func(sprint string, team string) FilterFunc {
-	return teamSprintFilter(defectFilter, sprint, team)
+var labelSprintDefectFilter = func(sprint string, label string) FilterFunc {
+	return labelSprintFilter(defectFilter, sprint, label)
 }
 
-var otherTeamsSprintFilter = func(issueTypeFilter FilterFunc, sprint string, teams []string) FilterFunc {
-	return multipleFilters(issueTypeFilter, sprintFilter(sprint), notTheseTeamsFilter(teams...))
+var otherLabelsSprintFilter = func(issueTypeFilter FilterFunc, sprint string, labels []string) FilterFunc {
+	return multipleFilters(issueTypeFilter, sprintFilter(sprint), notTheseLabelsFilter(labels...))
 }
 
-var otherTeamsSprintDefectFilter = func(sprint string, teams []string) FilterFunc {
-	return otherTeamsSprintFilter(defectFilter, sprint, teams)
+var otherLabelsSprintDefectFilter = func(sprint string, labels []string) FilterFunc {
+	return otherLabelsSprintFilter(defectFilter, sprint, labels)
 }
 
-var otherTeamsSprintStoryFilter = func(sprint string, teams []string) FilterFunc {
-	return otherTeamsSprintFilter(storyFilter, sprint, teams)
+var otherLabelsSprintStoryFilter = func(sprint string, labels []string) FilterFunc {
+	return otherLabelsSprintFilter(storyFilter, sprint, labels)
 }
 
 var epicFilter = func(epic string) FilterFunc {
