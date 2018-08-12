@@ -3,27 +3,28 @@
 <title>kiki the dog</title>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 <style>
-  body { padding-top: 40px; }
+  body { padding-top: 70px; }
 </style>
 </head>
 <body>
-<div class="navbar navbar-default navbar-fixed-top">
-  <div class="container">
-    <div class="navbar-header">
-      <div class="navbar-brand">kiki the dog</div>
+  <nav class="navbar navbar-light bg-light  navbar-expand-lg fixed-top">
+    <a class="navbar-brand" href="/">kiki the dog</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+      <div class="navbar-nav">
+        <a class="nav-item nav-link active" href="/">kiki</a>
+        <a class="nav-item nav-link" href="/sprint?sprint=*">sprint</a>
+        <a class="nav-link" href="/group?epic=*&labels=*&sprint=*&fixVersions=*">group</a>
+        <a class="nav-link" href="/links">add links</a>
+      </div>
     </div>
-    <ul class="nav navbar-nav">
-      <li><a href="/">kiki</a></li>
-      <li><a href="/sprint?sprint=*">sprint</a></li>
-      <li><a href="/group?epic=*&labels=*&sprint=*&fixVersions=*">group</a></li>
-      <li><a href="/links">add links</a></li>
-    </ul>
+  </nav>
+  <div class="container">
+    {{template "body" .Data}}
   </div>
-</div>
-<div class="container">
-  {{template "body" .Data}}
-</div>
 </body>
 </html>

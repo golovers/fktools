@@ -28,7 +28,7 @@ var routes = Routes{
 	Route{"Group Status", "GET", "/group", groupStatus},
 	Route{"Sprint Status", "GET", "/sprint", sprintStatus},
 	Route{"Links Configurations", "GET", "/links", linkConfig},
-	Route{"Add link", "POST", "/links", addLink},
+	Route{"Add link", "POST", "/add_links", addLink},
 	Route{"Delete link", "DELETE", "/links", deleteLinks},
 }
 

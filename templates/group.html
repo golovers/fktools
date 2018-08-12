@@ -1,9 +1,9 @@
-<h2>Summary of {{ .Sprint}}</h2>
-<h4>Stories (points)</h4>
+<h3>{{ .Name }}</h3>
+<h4>Stories Status (points)</h4>
+{{with .StoriesStatus}}
 <table class="table table-hover table-bordered">
     <thead class="thead-dark">
         <tr>
-            <th>Team/Status</th>
             <th>Open</th>
             <th>In Progress</th>
             <th>Resolved</th>
@@ -12,22 +12,19 @@
         </tr>
     </thead>
     <tbody>
-        {{ range $key, $value := .TeamStatus }}
         <tr>
-            <td> {{ $key }}</td>
-            {{with $value.Stories}}
-            <td>{{ .Points.Open }}</td>
-            <td>{{ .Points.InProgress }}</td>
-            <td>{{ .Points.Resolved }}</td>
-            <td>{{ .Points.Reopened }}</td>
-            <td>{{ .Points.Closed }}</td>
-            {{ end }}
+            <td>{{ .Open }}</td>
+            <td>{{ .InProgress }}</td>
+            <td>{{ .Resolved }}</td>
+            <td>{{ .Reopened }}</td>
+            <td>{{ .Closed }}</td>
         </tr>
-        {{ end }}
     </tbody>
 </table>
+{{ end }}
 
-<h4>Defects (count)</h4>
+<h4>Defects Status (count)</h4>
+{{ with .DefectsStatus }}
 <table class="table table-hover table-bordered">
     <thead class="thead-dark">
         <tr>
@@ -41,8 +38,6 @@
         </tr>
     </thead>
     <tbody>    
-        {{ with (index .TeamStatus "z_total_z")}}
-        {{with .Defects}}
         <tr>
             <td>Critical</td>
             <td>{{ .Critical.Open }}</td>
@@ -50,7 +45,7 @@
             <td>{{ .Critical.Resolved }}</td>
             <td>{{ .Critical.Reopened }}</td>
             <td>{{ .Critical.Closed }}</td>
-            <td>{{ sum .Critical.Open .Critical.InProgress .Critical.Resolved .Critical.Reopened}}</td>
+            <td>{{ .Critical.TotalOpen}}</td>
         </tr>
         <tr>
             <td> Major</td>
@@ -59,7 +54,7 @@
             <td>{{ .Major.Resolved }}</td>
             <td>{{ .Major.Reopened }}</td>
             <td>{{ .Major.Closed }}</td>
-            <td>{{ sum .Major.Open .Major.InProgress .Major.Resolved .Major.Reopened}}</td>
+            <td>{{ .Major.TotalOpen}}</td>
         </tr>
         <tr>
             <td>Minor</td>
@@ -68,7 +63,7 @@
             <td>{{ .Minor.Resolved }}</td>
             <td>{{ .Minor.Reopened }}</td>
             <td>{{ .Minor.Closed }}</td>
-            <td>{{ sum .Minor.Open .Minor.InProgress .Minor.Resolved .Minor.Reopened}}</td>
+            <td>{{ .Minor.TotalOpen}}</td>
         </tr>
         <tr>
             <td>Summary</td>
@@ -77,9 +72,61 @@
             <td>{{ sum .Critical.Resolved .Major.Resolved .Minor.Resolved}}</td>
             <td>{{ sum .Critical.Reopened .Major.Reopened .Minor.Reopened }}</td>
             <td>{{ sum .Critical.Closed .Major.Closed .Minor.Closed }}</td>
-            <td>{{ sum .Critical.Open  .Major.Open .Minor.Open .Critical.InProgress .Major.InProgress .Minor.InProgress .Critical.Resolved .Major.Resolved .Minor.Resolved .Critical.Reopened .Major.Reopened .Minor.Reopened }}</td>
+            <td>{{ sum .Critical.TotalOpen  .Major.TotalOpen .Minor.TotalOpen}}</td>
+        </tr>
+    </tbody>
+</table>
+{{ end }}
+
+<h4>Story Details</h4>
+<table class="table table-hover table-bordered">
+    <thead class="thead-dark">
+        <tr>
+            <th>Key</th>
+            <th>Summary</th>
+            <th>FixVersions</th>
+            <th>Epic</th>
+            <th>Story Points</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{ range .Stories}}
+        <tr>
+            <td>{{ .Key }}</td>
+            <td>{{ .Summary }}</td>
+            <td>{{ .FixVersions }}</td>
+            <td>{{ .EpicLink }}</td>
+            <td>{{ .StoryPoints }}</td>
+            <td>{{ .Status }}</td>
         </tr>
         {{ end }}
-        {{ end }}
-    </tbody>    
+    </tbody>
 </table>
+<hr>
+<h4>Defect Details</h4>
+<table class="table table-hover table-bordered">
+    <thead class="thead-dark">
+        <tr>
+            <th>Key</th>
+            <th>Summary</th>
+            <th>FixVersions</th>
+            <th>Epic</th>
+            <th>Priority</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{ range .Defects}}
+        <tr>
+            <td>{{ .Key }}</td>
+            <td>{{ .Summary }}</td>
+            <td>{{ .FixVersions }}</td>
+            <td>{{ .EpicLink }}</td>
+            <td>{{ .Priority }}</td>
+            <td>{{ .Status }}</td>
+        </tr>
+        {{ end }}
+    </tbody>
+</table>
+

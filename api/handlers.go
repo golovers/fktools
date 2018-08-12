@@ -25,7 +25,7 @@ func linkConfig(w http.ResponseWriter, r *http.Request) {
 func addLink(w http.ResponseWriter, r *http.Request) {
 	link := &links.QuickLink{
 		Name:     r.FormValue("name"),
-		Link:     fmt.Sprintf("group?/epic=%s&fixVersions=%s&labels=%s&sprint=%s", r.FormValue("epic"), r.FormValue("fixVersions"), r.FormValue("labels"), r.FormValue("sprint")),
+		Link:     fmt.Sprintf("group?epic=%s&fixVersions=%s&labels=%s&sprint=%s", r.FormValue("epic"), r.FormValue("fixVersions"), r.FormValue("labels"), r.FormValue("sprint")),
 		Visitted: 0,
 	}
 	logrus.Infof("Link - name: %s, link: %s", link.Name, link.Link)
@@ -34,7 +34,7 @@ func addLink(w http.ResponseWriter, r *http.Request) {
 		writeErr(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-	http.Redirect(w, r, link.Link, http.StatusOK)
+	http.Redirect(w, r, "/links", http.StatusFound)
 }
 
 func deleteLinks(w http.ResponseWriter, r *http.Request) {

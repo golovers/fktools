@@ -1,26 +1,31 @@
 <h2>Add Quick Links</h2>
-<form action="/links" method="POST">
-    <div class="form form-group">
-            <label for="name">Name</label>
-            <input id="name" name="name" type="text" class="form-control" placeholder="Enter name of the link">
+<form action="/add_links" method="POST">
+    <div class="form-row">
+        <div class="form-group">
+                <label for="name">Name</label>
+                <input id="name" name="name" type="text" class="form-control" placeholder="Enter name of the link">
+            </div>
+        <div class="form-group">
+            <label for="epic">Epic</label>
+            <input id="epic" name="epic" type="text" class="form-control" placeholder="Enter Epic ID">
         </div>
-    <div class="form form-group">
-        <label for="epic">Epic</label>
-        <input id="epic" name="epic" type="text" class="form-control" placeholder="Enter Epic ID">
+        <div class="form-group">
+            <label for="fixVersions">Fix Versions</label>
+            <input id="fixVersions" name="fixVersions" type="text" class="form-control" placeholder="Enter fixVersions separate by comma, ie. R18.6,R18.7">
+        </div>
+        <div class="form-group">
+            <label for="sprint">Sprint</label>
+            <input id="sprint" name="sprint" type="text" class="form-control" placeholder="Enter sprint name, ie. Sprint 18">
+        </div>
+        <div class="form-group">
+            <label for="labels">Labels</label>
+            <input id="labels" name ="labels" type="text" class="form-control" placeholder="Enter Labels seprate by comma, ie. doraemon,onion">
+        </div>
     </div>
-    <div class="form form-group">
-        <label for="fixVersions">Fix Versions</label>
-        <input id="fixVersions" name="fixVersions" type="text" class="form-control" placeholder="Enter fixVersions separate by comma, ie. R18.6,R18.7">
+    <div class="form-row">    
+        <button class="btn btn-default">Add</button>
     </div>
-    <div class="form form-group">
-        <label for="labels">Labels</label>
-        <input id="labels" name ="labels" type="text" class="form-control" placeholder="Enter Labels seprate by comma, ie. doraemon,onion">
-    </div>
-    <div class="form form-group">
-        <label for="sprint">Sprint</label>
-        <input id="sprint" name="sprint" type="text" class="form-control" placeholder="Enter sprint name, ie. Sprint 18">
-    </div>
-    <button class="btn btn-default">Add</button>
+    
 </form>
 
 <h3>Existing Quick Links</h3>
