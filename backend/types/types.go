@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"sort"
 	"strings"
 	"time"
 
@@ -86,4 +87,10 @@ func IssuesToJSONString(issues Issues) (string, error) {
 		return "", err
 	}
 	return string(data), nil
+}
+
+func (iss Issues) Sort() {
+	sort.Slice(iss, func(i, j int) bool {
+		return strings.Compare(iss[i].Status, iss[j].Status) == 0
+	})
 }

@@ -3,3 +3,6 @@ debug
 *.db/**
 *.env
 *.csv
+*.exe
+*.bin
+

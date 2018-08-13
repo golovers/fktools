@@ -30,6 +30,7 @@ func (s *simSvc) Load() (types.Issues, error) {
 	if err != nil {
 		return types.Issues{}, err
 	}
+	issues.Sort()
 	return transform(issues), nil
 }
 

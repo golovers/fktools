@@ -9,6 +9,8 @@
             <th>Resolved</th>
             <th>Reopened</th>
             <th>Closed</th>
+            <th>T</th>
+            <th>TO</th>
         </tr>
     </thead>
     <tbody>
@@ -18,6 +20,8 @@
             <td>{{ .Resolved }}</td>
             <td>{{ .Reopened }}</td>
             <td>{{ .Closed }}</td>
+            <td class="table-secondary font-weight-bold">{{ .Total }}</td>
+            <td class="table-secondary font-weight-bold">{{ .TotalOpen }}</td>
         </tr>
     </tbody>
 </table>
@@ -34,7 +38,7 @@
             <th>Resolved</th>
             <th>Reopened</th>
             <th>Closed</th>
-            <th>Total Open</th>
+            <th>T</th>
         </tr>
     </thead>
     <tbody>    
@@ -45,7 +49,7 @@
             <td>{{ .Critical.Resolved }}</td>
             <td>{{ .Critical.Reopened }}</td>
             <td>{{ .Critical.Closed }}</td>
-            <td>{{ .Critical.TotalOpen}}</td>
+            <td class="table-secondary font-weight-bold">{{ .Critical.Total}}</td>
         </tr>
         <tr>
             <td> Major</td>
@@ -54,7 +58,7 @@
             <td>{{ .Major.Resolved }}</td>
             <td>{{ .Major.Reopened }}</td>
             <td>{{ .Major.Closed }}</td>
-            <td>{{ .Major.TotalOpen}}</td>
+            <td class="table-secondary font-weight-bold">{{ .Major.Total}}</td>
         </tr>
         <tr>
             <td>Minor</td>
@@ -63,16 +67,16 @@
             <td>{{ .Minor.Resolved }}</td>
             <td>{{ .Minor.Reopened }}</td>
             <td>{{ .Minor.Closed }}</td>
-            <td>{{ .Minor.TotalOpen}}</td>
+            <td class="table-secondary font-weight-bold">{{ .Minor.Total}}</td>
         </tr>
-        <tr>
-            <td>Summary</td>
+        <tr class="table-secondary font-weight-bold">
+            <td>Total Unique Issues</td>
             <td>{{ sum .Critical.Open  .Major.Open .Minor.Open}}</td>
             <td>{{ sum .Critical.InProgress .Major.InProgress .Minor.InProgress}}</td>
             <td>{{ sum .Critical.Resolved .Major.Resolved .Minor.Resolved}}</td>
             <td>{{ sum .Critical.Reopened .Major.Reopened .Minor.Reopened }}</td>
             <td>{{ sum .Critical.Closed .Major.Closed .Minor.Closed }}</td>
-            <td>{{ sum .Critical.TotalOpen  .Major.TotalOpen .Minor.TotalOpen}}</td>
+            <td>{{ sum .Critical.Total  .Major.Total .Minor.Total}}</td>
         </tr>
     </tbody>
 </table>
@@ -103,7 +107,7 @@
         {{ end }}
     </tbody>
 </table>
-<hr>
+
 <h4>Defect Details</h4>
 <table class="table table-hover table-bordered">
     <thead class="thead-dark">

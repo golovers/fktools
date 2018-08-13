@@ -45,6 +45,7 @@ func (svc *reportSvc) statusAndIssues(aggr AggrFunc, filters ...FilterFunc) (*Pr
 			status.update(issue.Priority, issue.Status, aggr(issue))
 		}
 	}
+	filIssues.Sort()
 	return status, filIssues
 }
 

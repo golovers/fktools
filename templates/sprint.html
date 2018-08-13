@@ -3,16 +3,18 @@
 <table class="table table-hover table-bordered">
     <thead class="thead-dark">
         <tr>
-            <th>Team/Status</th>
+            <th>Team</th>
             <th>Open</th>
             <th>In Progress</th>
             <th>Resolved</th>
             <th>Reopened</th>
             <th>Closed</th>
+            <th>T</th>
         </tr>
     </thead>
     <tbody>
         {{ range $key, $value := .TeamStatus }}
+        {{ if and (ne $key "z_total_z") (ne $key "_other_")}}
         <tr>
             <td> {{ $key }}</td>
             {{with $value.Stories}}
@@ -21,14 +23,29 @@
             <td>{{ .Points.Resolved }}</td>
             <td>{{ .Points.Reopened }}</td>
             <td>{{ .Points.Closed }}</td>
+            <td class="table-secondary font-weight-bold">{{ .Points.Total }}</td>
             {{ end }}
         </tr>
         {{ end }}
+        {{ end }}
+        {{ with (index .TeamStatus "z_total_z")}}
+        <tr class="table-secondary font-weight-bold">
+            <td>Sum Estimation</td>
+            {{with .Stories}}
+            <td>{{ .Points.Open }}</td>
+            <td>{{ .Points.InProgress }}</td>
+            <td>{{ .Points.Resolved }}</td>
+            <td>{{ .Points.Reopened }}</td>
+            <td>{{ .Points.Closed }}</td>
+            <td>{{ .Points.Total }}</td>
+            {{ end }}
+        </tr>
+        {{ end  }}
     </tbody>
 </table>
 
 <h4>Defects (count)</h4>
-<table class="table table-hover table-bordered">
+<table class="table table-hover table-bordered text-left">
     <thead class="thead-dark">
         <tr>
             <th>Priority/Status</th>
@@ -37,7 +54,7 @@
             <th>Resolved</th>
             <th>Reopened</th>
             <th>Closed</th>
-            <th>Total Open</th>
+            <th>T</th>
         </tr>
     </thead>
     <tbody>    
@@ -50,7 +67,7 @@
             <td>{{ .Critical.Resolved }}</td>
             <td>{{ .Critical.Reopened }}</td>
             <td>{{ .Critical.Closed }}</td>
-            <td>{{ sum .Critical.Open .Critical.InProgress .Critical.Resolved .Critical.Reopened}}</td>
+            <td class="table-secondary font-weight-bold">{{ .Critical.Total}}</td>
         </tr>
         <tr>
             <td> Major</td>
@@ -59,7 +76,7 @@
             <td>{{ .Major.Resolved }}</td>
             <td>{{ .Major.Reopened }}</td>
             <td>{{ .Major.Closed }}</td>
-            <td>{{ sum .Major.Open .Major.InProgress .Major.Resolved .Major.Reopened}}</td>
+            <td class="table-secondary font-weight-bold">{{ .Major.Total}}</td>
         </tr>
         <tr>
             <td>Minor</td>
@@ -68,16 +85,16 @@
             <td>{{ .Minor.Resolved }}</td>
             <td>{{ .Minor.Reopened }}</td>
             <td>{{ .Minor.Closed }}</td>
-            <td>{{ sum .Minor.Open .Minor.InProgress .Minor.Resolved .Minor.Reopened}}</td>
+            <td class="table-secondary font-weight-bold">{{ sum .Minor.Total}}</td>
         </tr>
-        <tr>
-            <td>Summary</td>
+        <tr class="table-secondary font-weight-bold">
+            <td>Total Unique Issues</td>
             <td>{{ sum .Critical.Open  .Major.Open .Minor.Open}}</td>
             <td>{{ sum .Critical.InProgress .Major.InProgress .Minor.InProgress}}</td>
             <td>{{ sum .Critical.Resolved .Major.Resolved .Minor.Resolved}}</td>
             <td>{{ sum .Critical.Reopened .Major.Reopened .Minor.Reopened }}</td>
             <td>{{ sum .Critical.Closed .Major.Closed .Minor.Closed }}</td>
-            <td>{{ sum .Critical.Open  .Major.Open .Minor.Open .Critical.InProgress .Major.InProgress .Minor.InProgress .Critical.Resolved .Major.Resolved .Minor.Resolved .Critical.Reopened .Major.Reopened .Minor.Reopened }}</td>
+            <td>{{ sum .Critical.Total  .Major.Total .Minor.Total }}</td>
         </tr>
         {{ end }}
         {{ end }}
