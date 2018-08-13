@@ -40,16 +40,16 @@ var sprintFilter = func(sprint string) FilterFunc {
 	}
 }
 
-var labelSprintFilter = func(issueTypeFilter FilterFunc, sprint string, label string) FilterFunc {
-	return multipleFilters(issueTypeFilter, sprintFilter(sprint), oneOfTheseLabels(label))
+var labelSprintFilter = func(issueTypeFilter FilterFunc, sprint string, label ...string) FilterFunc {
+	return multipleFilters(issueTypeFilter, sprintFilter(sprint), oneOfTheseLabels(label...))
 }
 
-var labelSprintStoryFilter = func(sprint string, label string) FilterFunc {
-	return labelSprintFilter(storyFilter, sprint, label)
+var labelSprintStoryFilter = func(sprint string, labels ...string) FilterFunc {
+	return labelSprintFilter(storyFilter, sprint, labels...)
 }
 
-var labelSprintDefectFilter = func(sprint string, label string) FilterFunc {
-	return labelSprintFilter(defectFilter, sprint, label)
+var labelSprintDefectFilter = func(sprint string, labels ...string) FilterFunc {
+	return labelSprintFilter(defectFilter, sprint, labels...)
 }
 
 var otherLabelsSprintFilter = func(issueTypeFilter FilterFunc, sprint string, labels []string) FilterFunc {

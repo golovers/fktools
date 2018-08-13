@@ -7,6 +7,7 @@ import (
 	"github.com/golovers/kiki/backend/issues"
 
 	"github.com/golovers/kiki/backend/types"
+	"github.com/golovers/kiki/backend/utils"
 )
 
 type reportSvc struct {
@@ -69,8 +70,8 @@ func (svc *reportSvc) Sprint(sprint string, labels ...string) TeamSprintStatus {
 		TeamStatus: make(map[string]SprintStatus),
 	}
 	rs.TeamStatus["z_total_z"] = SprintStatus{
-		Defects: svc.Defects(labelSprintDefectFilter(sprint, "*")),
-		Stories: svc.Stories(labelSprintStoryFilter(sprint, "*")),
+		Defects: svc.Defects(labelSprintDefectFilter(sprint, labels...)),
+		Stories: svc.Stories(labelSprintStoryFilter(sprint, labels...)),
 	}
 	if len(labels) > 0 && labels[0] == "" {
 		return rs
@@ -81,9 +82,11 @@ func (svc *reportSvc) Sprint(sprint string, labels ...string) TeamSprintStatus {
 			Stories: svc.Stories(labelSprintStoryFilter(sprint, label)),
 		}
 	}
-	rs.TeamStatus["z_other_z"] = SprintStatus{
-		Defects: svc.Defects(otherLabelsSprintDefectFilter(sprint, labels)),
-		Stories: svc.Stories(otherLabelsSprintStoryFilter(sprint, labels)),
+	if utils.OneOf("_other_", labels...) {
+		rs.TeamStatus["z_other_z"] = SprintStatus{
+			Defects: svc.Defects(otherLabelsSprintDefectFilter(sprint, labels)),
+			Stories: svc.Stories(otherLabelsSprintStoryFilter(sprint, labels)),
+		}
 	}
 	return rs
 }

@@ -1,3 +1,9 @@
+<style>
+    .link {
+        font-size: 1.5em;
+        font-weight: bold
+    }
+</style>
 <h2>Add Quick Links</h2>
 <form method="POST">
     <div class="form-row">
@@ -25,7 +31,7 @@
     <li class="list-group-item">    
         <div class="row">
             <form>
-                <a href={{.Link}}>{{.FullName}}</a> <button formaction="/links/delete/{{.Type}}/{{.ID}}" formmethod="POST">Delete</button>
+                <a class="link" href={{.Link}}>{{.FullName}}</a> <button class="btn btn-danger" formaction="/links/delete/{{.Type}}/{{.ID}}" formmethod="POST">Delete</button>
             </form>
         </div>
     </li>
