@@ -27,9 +27,11 @@ var routes = Routes{
 	Route{"Index", "GET", "/", index},
 	Route{"Group Status", "GET", "/group", groupStatus},
 	Route{"Sprint Status", "GET", "/sprint", sprintStatus},
-	Route{"Links Configurations", "GET", "/links", linkConfig},
-	Route{"Add link", "POST", "/add_links", addLink},
-	Route{"Delete link", "DELETE", "/links", deleteLinks},
+	Route{"Links Configurations", "GET", "/links", groupLinks},
+	Route{"Add link", "POST", "/add_link", addLink},
+	Route{"Add link", "POST", "/run_link", runLink},
+	Route{"Add link", "GET", "/sprint_links", sprintLinks},
+	Route{"Delete a link", "POST", "/links/delete/{type:[a-z]+}/{id:[a-zA-Z0-9]+}", deleteLink},
 }
 
 // NewRouter return a new router with middlewares registered

@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"sort"
 
+	"github.com/rs/xid"
+
 	"github.com/sirupsen/logrus"
 
 	"github.com/golovers/kiki/backend/db"
@@ -39,6 +41,7 @@ func (svc *simLinkSvc) Links() []*QuickLink {
 
 //Add add the new links to existing list
 func (svc *simLinkSvc) Add(link *QuickLink) error {
+	link.ID = xid.New().String()
 	links := svc.Links()
 	links = append(links, link)
 	data, err := json.Marshal(links)
@@ -50,9 +53,26 @@ func (svc *simLinkSvc) Add(link *QuickLink) error {
 }
 
 func (svc *simLinkSvc) Delete(id string) error {
+	links := svc.Links()
+	svc.DeleteAll()
+	for _, l := range links {
+		if l.ID != id {
+			svc.Add(l)
+		}
+	}
 	return nil
 }
 
 func (svc *simLinkSvc) DeleteAll() error {
 	return db.Delete(quicLinksKey)
+}
+
+func (svc *simLinkSvc) LinksByType(typ string) []*QuickLink {
+	links := make([]*QuickLink, 0)
+	for _, l := range svc.Links() {
+		if l.Type == typ {
+			links = append(links, l)
+		}
+	}
+	return links
 }

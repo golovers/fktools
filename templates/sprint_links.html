@@ -2,26 +2,18 @@
 <form method="POST">
     <div class="form-row">
         <div class="form-group">
-                <label for="name">Name</label>
-                <input id="name" name="name" type="text" class="form-control" placeholder="Enter name of the link">
-            </div>
-        <div class="form-group">
-            <label for="epic">Epic</label>
-            <input id="epic" name="epic" type="text" class="form-control" placeholder="Enter Epic ID">
-        </div>
-        <div class="form-group">
-            <label for="fixVersions">Fix Versions</label>
-            <input id="fixVersions" name="fixVersions" type="text" class="form-control" placeholder="Enter fixVersions separate by comma, ie. R18.6,R18.7">
+            <label for="name">Name</label>
+            <input id="name" name="name" type="text" class="form-control" placeholder="Enter name of the link">
         </div>
         <div class="form-group">
             <label for="sprint">Sprint</label>
             <input id="sprint" name="sprint" type="text" class="form-control" placeholder="Enter sprint name, ie. Sprint 18">
         </div>
         <div class="form-group">
-            <label for="labels">Labels</label>
-            <input id="labels" name ="labels" type="text" class="form-control" placeholder="Enter Labels seprate by comma, ie. doraemon,onion">
+            <label for="teams">Teams (labels)</label>
+            <input id="teams" name ="teams" type="text" class="form-control" placeholder="Enter labels as teams seprate by comma, ie. doraemon,onion">
         </div>
-        <input type="hidden" name="type" value="group">
+        <input type="hidden" name="type" value="sprint">
     </div>
     <button type="submit" class="btn btn-success" formaction="run_link">Run</button>
     <button type="submit" class="btn btn-success" formaction="add_link">Add This As A Quick Link</button>

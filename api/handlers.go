@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/gorilla/mux"
+
 	"github.com/sirupsen/logrus"
 
 	"github.com/golovers/kiki/backend/links"
@@ -18,27 +20,62 @@ func index(w http.ResponseWriter, r *http.Request) {
 	indexTmpl.Execute(w, r, ls)
 }
 
-func linkConfig(w http.ResponseWriter, r *http.Request) {
-	linksTmpl.Execute(w, r, links.Links())
+func groupLinks(w http.ResponseWriter, r *http.Request) {
+	linksTmpl.Execute(w, r, links.LinksByType("group"))
 }
 
 func addLink(w http.ResponseWriter, r *http.Request) {
-	link := &links.QuickLink{
-		Name:     r.FormValue("name"),
-		Link:     fmt.Sprintf("group?epic=%s&fixVersions=%s&labels=%s&sprint=%s", r.FormValue("epic"), r.FormValue("fixVersions"), r.FormValue("labels"), r.FormValue("sprint")),
-		Visitted: 0,
-	}
+	link := linkFromRequest(r)
 	logrus.Infof("Link - name: %s, link: %s", link.Name, link.Link)
 	err := links.Add(link)
 	if err != nil {
 		writeErr(w, http.StatusInternalServerError, err.Error())
 		return
 	}
-	http.Redirect(w, r, "/links", http.StatusFound)
+	if link.Type == "group" {
+		http.Redirect(w, r, "/links", http.StatusFound)
+		return
+	}
+	http.Redirect(w, r, "/sprint_links", http.StatusFound)
 }
 
-func deleteLinks(w http.ResponseWriter, r *http.Request) {
-	links.DeleteAll()
+func linkFromRequest(r *http.Request) *links.QuickLink {
+	var link *links.QuickLink
+	if r.FormValue("type") == "group" {
+		link = &links.QuickLink{
+			Name:     r.FormValue("name"),
+			Type:     "group",
+			Link:     fmt.Sprintf("group?epic=%s&fixVersions=%s&labels=%s&sprint=%s", r.FormValue("epic"), r.FormValue("fixVersions"), r.FormValue("labels"), r.FormValue("sprint")),
+			Visitted: 0,
+		}
+	} else {
+		link = &links.QuickLink{
+			Name: r.FormValue("name"),
+			Type: "sprint",
+			Link: fmt.Sprintf("sprint?sprint=%s&teams=%s", r.FormValue("sprint"), r.FormValue("teams")),
+		}
+	}
+	return link
+}
+
+func runLink(w http.ResponseWriter, r *http.Request) {
+	link := linkFromRequest(r)
+	http.Redirect(w, r, link.Link, http.StatusFound)
+}
+
+func sprintLinks(w http.ResponseWriter, r *http.Request) {
+	sprintLInksTmpl.Execute(w, r, links.LinksByType("sprint"))
+}
+
+func deleteLink(w http.ResponseWriter, r *http.Request) {
+	id := mux.Vars(r)["id"]
+	logrus.Info("links to be deleted: ", id)
+	links.Delete(id)
+	if mux.Vars(r)["type"] == "group" {
+		http.Redirect(w, r, "/links", http.StatusFound)
+		return
+	}
+	http.Redirect(w, r, "/sprint_links", http.StatusFound)
 }
 
 func sprintStatus(w http.ResponseWriter, r *http.Request) {

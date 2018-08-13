@@ -9,10 +9,11 @@ import (
 )
 
 var (
-	indexTmpl  = parseTemplate("index.html")
-	epicTmpl   = parseTemplate("group.html")
-	sprintTmpl = parseTemplate("sprint.html")
-	linksTmpl  = parseTemplate("links.html")
+	indexTmpl       = parseTemplate("index.html")
+	epicTmpl        = parseTemplate("group.html")
+	sprintTmpl      = parseTemplate("sprint.html")
+	linksTmpl       = parseTemplate("links.html")
+	sprintLInksTmpl = parseTemplate("sprint_links.html")
 )
 
 // parseTemplate applies a given file to the body of the base template.

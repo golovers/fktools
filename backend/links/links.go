@@ -4,8 +4,10 @@ var quicLinksKey = []byte("quickLinks")
 var svc LinkSvc
 
 type QuickLink struct {
+	ID       string
 	Name     string
 	Link     string
+	Type     string
 	Visitted int64
 }
 
@@ -25,6 +27,7 @@ type LinkSvc interface {
 	Add(link *QuickLink) error
 	Delete(id string) error
 	DeleteAll() error
+	LinksByType(typ string) []*QuickLink
 }
 
 // Links return  all exiting links
@@ -39,4 +42,12 @@ func Add(link *QuickLink) error {
 
 func DeleteAll() error {
 	return svc.DeleteAll()
+}
+
+func LinksByType(typ string) []*QuickLink {
+	return svc.LinksByType(typ)
+}
+
+func Delete(id string) error {
+	return svc.Delete(id)
 }
