@@ -1,6 +1,8 @@
 package conf
 
-import "github.com/kelseyhightower/envconfig"
+import (
+	"github.com/kelseyhightower/envconfig"
+)
 
 // Conf configurations
 type Conf struct {
@@ -9,8 +11,8 @@ type Conf struct {
 	Host          string            `envconfig:"KIKI_HOST"`
 	Username      string            `envconfig:"KIKI_USERNAME"`
 	Password      string            `envconfig:"KIKI_PASSWORD"`
-	FieldsMapping map[string]string `envconfig:"KIKI_FIELD_MAPPING"`
-	BaseQuery     string            `envconfig:"KIKI_BASE_QUERY"`
+	FieldsMapping map[string]string `envconfig:"KIKI_FIELD_MAPPING" default:"sprint:customfield_10801,epic:customfield_11209,storypoint:customfield_10011"`
+	BaseQuery     string            `envconfig:"KIKI_BASE_QUERY" default:"issuetype not in (Task, Sub-task, Test)"`
 
 	HTTPAddress string `envconfig:"KIKI_HTTP_ADDRESS" default:":8080"`
 	SyncSched   string `envconfig:"KIKI_SYNC_SCHED" default:"@every 5m"`
