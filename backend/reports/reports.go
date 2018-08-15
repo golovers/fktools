@@ -76,7 +76,7 @@ func (ov *StatusSummary) update(status string, v float64) {
 	case "resolved":
 		ov.Resolved += v
 	case "reopened":
-		ov.Resolved += v
+		ov.Reopened += v
 	case "closed":
 		ov.Closed += v
 	default:

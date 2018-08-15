@@ -1,4 +1,5 @@
 <h2>Summary of {{ .Sprint}}</h2>
+{{ $sprintName := .Sprint }}
 <h4>Stories (points)</h4>
 <table class="table table-hover table-bordered">
     <thead class="thead-dark">
@@ -16,7 +17,9 @@
         {{ range $key, $value := .TeamStatus }}
         {{ if and (ne $key "z_total_z") (ne $key "_other_")}}
         <tr>
-            <td> {{ $key }}</td>
+            {{ with $link := (printf "group?sprint=%s&labels=%s&fixVersions=*&epic=*" $sprintName $key) }}
+            <td> <a href={{$link}}>{{ $key }}</a></td>
+            {{ end }}
             {{with $value.Stories}}
             <td>{{ .Points.Open }}</td>
             <td>{{ .Points.InProgress }}</td>
