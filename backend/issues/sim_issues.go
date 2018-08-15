@@ -11,17 +11,19 @@ import (
 )
 
 var keyIssue = []byte("issues")
+var issuesDB db.Database
 
 type simSvc struct {
 }
 
 func NewSimIssueSvc() IssueSvc {
+	issuesDB = db.Table("issues")
 	return &simSvc{}
 }
 
 // AllIssues return all iss
 func (s *simSvc) Load() (types.Issues, error) {
-	data, err := db.Get(keyIssue)
+	data, err := issuesDB.Get(keyIssue)
 	if err != nil {
 		return types.Issues{}, err
 	}
@@ -51,7 +53,7 @@ func saveIssues(issues types.Issues) {
 	if err != nil {
 		logrus.Errorf("failed to save iss: %v", err)
 	}
-	db.Put(keyIssue, data)
+	issuesDB.Put(keyIssue, data)
 }
 
 func transform(issues types.Issues) types.Issues {

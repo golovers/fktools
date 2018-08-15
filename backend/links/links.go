@@ -26,7 +26,6 @@ type LinkSvc interface {
 	Links() []*QuickLink
 	Add(link *QuickLink) error
 	Delete(id string) error
-	DeleteAll() error
 	LinksByType(typ string) []*QuickLink
 }
 
@@ -38,10 +37,6 @@ func Links() []*QuickLink {
 //AddQuickLinks add the new links to existing list
 func Add(link *QuickLink) error {
 	return svc.Add(link)
-}
-
-func DeleteAll() error {
-	return svc.DeleteAll()
 }
 
 func LinksByType(typ string) []*QuickLink {
